@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.w3.org/1000/xhtml">
+  <head th:replace="common/header :: common-header" />
+   
+   <body>
+   <div th:replace="common/header :: navbar" />
+   <div class="container box">
+   <div class="row">
+	   
+		
+   <div class="col-xs-8"> 
+	<div class="panel panel-default">
+     <div class="panel-body">
+   <div id="hero-carousel" class="carousel slide" data-bs-ride="carousel">
+	<div class="carousel-indicators">
+    <button type="button" data-bs-target="#hero-carousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+    <button type="button" data-bs-target="#hero-carousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+    <button type="button" data-bs-target="#hero-carousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
+  </div>   
+  <div class="carousel-inner" role="listbox">
+    <div class="carousel-item active c-item">
+      <img src="https://c7.alamy.com/comp/RWG34T/rolling-dough-for-bread-in-a-bakery-in-freetown-sierra-leone-RWG34T.jpg" clip-path="url(#clip)" width="1500" height="300" alt="..."></image>
+      <div class="carousel-caption top-0 mt-4 d-none d-md-block">
+ 
+        <p class="fs-3 mt-5 text-uppercase">Welcome to Sierra Leone BreadBite Bakery</p>
+      </div>
+    </div>
+    <div class="carousel-item c-item">
+      <img src="/image/4.png" clip-path="url(#clip)" width="1500" height="300" alt="..."></image>
+      <div class="carousel-caption top-0 mt-4 d-none d-md-block">
+
+        <p class="fs-3 mt-5 text-uppercase">Welcome to Sierra Leone BreadBite Bakery</p>
+   
+      </div>
+    </div>
+    <div class="carousel-item c-item">
+            <img src="/image/5.png" clip-path="url(#clip)" width="1500" height="300" alt="..."></image>
+      <div class="carousel-caption top-0 mt-4 d-none d-md-block">
+      
+        <p class="fs-3 mt-5 text-uppercase">Welcome to Sierra Leone BreadBite Bakery</p>
+        
+      </div>
+       
+      
+    </div>
+  </div>
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Previous</span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+    <span class="visually-hidden">Next</span>
+  </button>
+</div>
+ </div>
+ </div> 
+    </div>
+	   </div>
+ <section class="col-xs-4 overview">
+	 
+ </section>   
+</div>
+</div>
+
+<section class="overview " >
+	<div class="container d-flex align-items-center" style="background-color: rgb(128, 255, 255); height: 70px;">
+	<div class="row w-100 text-center fs-4">
+	<div class="col-xl">
+		<i class="bi bi-basket2-fill me-2"></i>
+		Wonderfull Breads
+	</div>
+	<div class="col-xl">
+		<i class="bi bi-cart4 me-2"></i>
+		Get 20% discount on purchase
+	</div>
+	<div class="col-xl">
+		<i class="bi bi-cash-coin me-2"></i>
+		Oder now and get discount 
+	</div>
+	</div>
+	</div>
+</section>
+
+<section id="packages" class="pt-5">
+	<h2 class="text-center my-5">BreadBite Basket</h2>
+	<div class="container">
+	<div class="row">
+		<div class="col-lg">
+		<div class="card">
+        <img src="/image/bread1.png" class="card-img-top" alt="...">
+        <div class="card-body">
+        <h5 class="card-title">Salone bread</h5>
+        <p class="card-text">Get the great taste of bread made in Sierra Leone local restaurant. </p>
+        <a href="#" class="btn btn-primary">Welcome here</a>
+        </div>
+     </div>	
+		</div>
+		<div class="col-lg">
+			<div class="card">
+            <img src="/image/1.png" class="card-img-top" alt="...">
+            <div class="card-body">
+            <h5 class="card-title">Salone bread</h5>
+            <p class="card-text">You can only get the best of salone bread here, come for a better experience .</p>
+            <a href="#" class="btn btn-primary">Welcome here</a>
+         </div>
+      </div>
+		</div>
+		<div class="col-lg">
+			<div class="card">
+            <img src="/image/bestseller.png" class="card-img-top" alt="...">
+            <div class="card-body">
+            <h5 class="card-title">Salone bread</h5>
+            <p class="card-text">The only place in salone with a great experience of best bread taste .</p>
+            <a href="#" class="btn btn-primary">Welcome here</a>
+         </div>
+       </div>
+		</div>
+	</div>
+	</div>
+</section>
+
+<section id="faq" class="py-md-5">
+	<h2 class="my-5 text-center">FAQ</h2>
+	
+	<div class="container">
+	<div class="accordion w-75 mx-auto" id="accordionExample">
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+        Opening Hours 
+      </button>
+    </h2>
+    <div id="collapseOne" class="accordion-collapse collapse show" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <strong>This is the first item's accordion body.</strong> It is shown by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+      </div>
+    </div>
+  </div>
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+        Directions
+      </button>
+    </h2>
+    <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+      </div>
+    </div>
+  </div>
+  <div class="accordion-item">
+    <h2 class="accordion-header">
+      <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+        Service Delivery 
+      </button>
+    </h2>
+    <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+      <div class="accordion-body">
+        <strong>This is the third item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.accordion-body</code>, though the transition does limit overflow.
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+</section>
+
+<footer class="bg-dark py-5 mt-5">
+    <div class="container text-light text-center">
+        <p class="display-5 mb-3">BreadBite</p>
+        <small class="text-white-50">&copy; Copyright by SamuelSesay. All right reserved 2024</small>
+    </div>
+</footer>
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+   <div th:replace="common/header :: body-bottom-scripts"/>
+  </body>
+</html>

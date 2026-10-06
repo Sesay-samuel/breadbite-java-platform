@@ -1,0 +1,107 @@
+/* Root variable definitions for easy theme management */
+:root {
+    --primary-color: rgb(128, 0, 64);
+    --background-color: #231F20;
+    --text-color: #fff;
+    --link-color: #ecf0f1;
+    --link-hover-color: #f8f9f8;
+    --border-color: #333;
+}
+
+body {
+    font-family: 'Arial', sans-serif; /* Modern and clean font */
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4; /* Light grey background for better readability */
+}
+
+.dropdown-menu{
+	max-height: 200px;
+	overflow-y: scroll;
+}
+
+hr {
+    border: none;
+    height: 1px;
+    background-color: var(--border-color);
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px; /* Maximum width for large screens */
+    margin: 0 auto; /* Center aligning the container */
+}
+
+.navbar {
+    margin-bottom: 20px;
+    background-color: var(--primary-color);
+    border-color: var(--link-color);
+}
+
+.navbar .navbar-brand,
+.navbar .navbar-text,
+.navbar .navbar-nav > li > a {
+    color: var(--link-color);
+}
+
+.navbar .navbar-brand:hover,
+.navbar .navbar-brand:focus,
+.navbar .navbar-nav > li > a:hover,
+.navbar .navbar-nav > li > a:focus {
+    color: var(--link-hover-color);
+}
+
+.navbar .navbar-nav > .active > a,
+.navbar .navbar-nav > .active > a:hover,
+.navbar .navbar-nav > .active > a:focus,
+.navbar .navbar-nav > .open > a,
+.navbar .navbar-nav > .open > a:hover,
+.navbar .navbar-nav > .open > a:focus {
+    background-color: #293872;
+}
+
+.navbar .navbar-toggle {
+    border-color: #293872;
+}
+
+.navbar .navbar-toggle:hover,
+.navbar .navbar-toggle:focus {
+    background-color: #293872;
+}
+
+.navbar .navbar-toggle .icon-bar {
+    background-color: var(--link-color);
+}
+
+.box {
+    border: 1px solid var(--primary-color);
+}
+
+.home-headline,
+.section-headline {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 24px;
+    color: var(--text-color);
+    text-align: center;
+    margin: auto;
+    background-color: var(--background-color);
+    padding: 5px 22px;
+}
+
+@media (max-width: 768px) {
+    .navbar .navbar-nav .open .dropdown-menu > li > a,
+    .navbar .navbar-nav .open .dropdown-menu > li > a:hover,
+    .navbar .navbar-nav .open .dropdown-menu > li > a:focus {
+        color: var(--link-color);
+    }
+
+    .navbar .navbar-nav .open .dropdown-menu > .active > a,
+    .navbar .navbar-nav .open .dropdown-menu > .active > a:hover,
+    .navbar .navbar-nav .open .dropdown-menu > .active > a:focus {
+        background-color: #293872;
+    }
+
+    .container {
+        width: 100%;
+    }
+}

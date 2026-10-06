@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="common/header :: common-header"/>
+<body>
+<div th:replace="common/header :: navbar"></div>
+<div class="container">
+    <div class="row mb-n5">
+        <div class="col-md-8">
+            <h2 class="section-headline"><span>User Account</span></h2>
+        </div>
+        <div class="col-md-4">
+            <img src="/image/logo.png" class="img-fluid" alt="Logo"/>
+        </div>
+    </div>
+    <hr class="position-absolute w-100" style="height: 6px; background-color: #333; z-index: -1; margin-top: -80px;"/>
+    <img class="img-fluid" src="/image/wood.png" style="margin-top: -75px;" alt="Background Image"/>
+
+    <div class="row mt-3">
+        <div class="col-md-9 offset-md-3">
+            <img class="img-fluid" src="/image/hours.png" alt="Hours Image"/>
+        </div>
+    </div>
+</div>
+<div th:replace="common/header :: footer"/>
+
+	<div th:replace="common/header :: body-bottom-scripts" />
+</body>
+</html>

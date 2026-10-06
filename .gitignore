@@ -1,0 +1,9 @@
+
+# Local configuration backups - may contain secrets
+*.local-backup
+
+# Maven build output
+**/target/
+
+# IDE / generated binary output
+**/bin/

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="common/header :: common-header" />
+
+<body>
+	<div th:replace="common/header :: navbar" />
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Bread Information</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="table-responsive">
+            <table id="breadListTable" class="table table-bordered table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Category</th>
+                        <th>List Price</th>
+                        <th>Our Price</th>
+                        <th>Active?</th>
+                        <th>Operation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Iterate over each bread item -->
+                    <tr th:each="bread : ${breadList}">
+                        <td><a th:href="@{/home/bread/breadInfo(id=${bread.id})}" th:text="${bread.title}" /></td>
+                        <td th:text="${bread.category}"></td>
+                        <td th:text="${bread.listPrice}"></td>
+                        <td th:text="${bread.ourPrice}"></td>
+                        <td th:text="${bread.active}"></td>
+                        <td>delete</td> 
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+	<div th:replace="common/header :: body-bottom-scripts" />
+	<!-- Include jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/dataTables.bootstrap5.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $("#breadListTable").DataTable({
+                "lengthMenu": [5,10,15,20,-1,5,10,15,20,"All"],
+                "ordering": false,
+                stateSave: true
+            });
+        });
+    </script>
+</body>
+</html>

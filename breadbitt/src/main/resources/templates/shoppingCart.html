@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head th:replace="common/header :: common-header">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .text-right-custom {
+            text-align: right;
+        }
+        .text-center-custom {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="common/header :: navbar"></div>
+
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h2 class="section-headline">
+                    <span th:text="${user} ? ${#strings.toUpperCase(user.username)} : 'All Breads'"></span>
+                </h2>
+            </div>
+             <div class="col-md-4">
+                <img src="/image/logo.png" class="img-fluid" alt="Logo" />
+            </div>
+        </div>
+        <hr class="position-absolute w-100" style="height: 6px; background-color: #333; z-index: -1; margin-top: -80px;">
+        <img class="img-fluid" src="/image/wood.png" alt="Wood Image" style="margin-top: -75px;" />
+            
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="row">
+                    <div class="col-md-6 text-start">
+                        <a class="btn btn-warning" th:href="@{/breadshelf}">Continue Shopping</a>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <a class="btn btn-primary" th:href="@{/checkout(id=${shoppingCart.id})}">Check Out</a>
+                    </div>
+                    <div th:if="${notEnoughStock}" class="alert alert-warning mt-3">
+                        Oops, some of the products don't have enough stock. Please update product quantity.
+                    </div>
+                    <div th:if="${emptyCart}" class="alert alert-warning mt-3">
+                        Oops, your cart is empty. See if you can find what you like in the bookshelf and add them to the cart.
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h4 class="ms-5">Products</h4>
+                        </div>
+                        <div class="col-md-2 text-right-custom">
+                            <h4>Price</h4>
+                        </div>
+                        <div class="col-md-2 text-center-custom">
+                            <h4>Qty</h4>
+                        </div>
+                    </div>
+
+                    <!-- Display products in cart -->
+                    <div th:each="cartItem : ${cartItemList}">
+                        <form th:action="@{/shoppingCart/updateCartItem}" method="post" class="row">
+                            <hr />
+                            <div class="col-md-2">
+                                <a th:href="@{/breadDetail(id=${cartItem.bread.id})}">
+                                    <img style="width:70px;" class="img-fluid shelf-bread"
+                                         th:src="@{/image/bread/{id}.png(id=${cartItem.bread.id})}" alt="Bread Image" />
+                                </a>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="ms-4">
+                                    <a th:href="@{/breadDetail(id=${cartItem.bread.id})}">
+                                        <h4 th:text="${cartItem.bread.title}"></h4>
+                                    </a>
+                                    <p th:if="${cartItem.bread.inStockNumber > 10}" class="text-success">In Stock</p>
+                                    <p th:if="${cartItem.bread.inStockNumber < 10 and cartItem.bread.inStockNumber > 0}" class="text-success">
+                                        Only <span th:text="${cartItem.bread.inStockNumber}"></span> In Stock
+                                    </p>
+                                    <p th:if="${cartItem.bread.inStockNumber == 0}" class="text-danger">Product Unavailable</p>
+                                    <a th:href="@{/shoppingCart/removeItem(id=${cartItem.id})}">delete</a>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <h5 class="text-danger" style="font-size: large;">
+                                    $<span th:text="${cartItem.bread.ourPrice}"
+                                          th:style="${cartItem.bread.inStockNumber == 0 ? 'text-decoration: line-through' : ''}"></span>
+                                </h5>
+                            </div>
+
+                            <div class="col-md-2">
+                                <input type="hidden" name="id" th:value="${cartItem.id}" />
+                                <input th:id="${cartItem.id}" th:name="qty" th:disabled="${cartItem.bread.inStockNumber == 0}"
+                                       class="form-control cartItemQty" th:value="${cartItem.qty}" />
+                                <button class="btn btn-warning btn-sm mt-2 d-none" th:id="'update-item-' + ${cartItem.id}" type="submit">
+                                    Update
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="row">
+                        <hr />
+                        <h4 class="col-12 text-end">
+                            <strong style="font-size: large;">Total Price (<span th:text="${#lists.size(cartItemList)}"></span> items):
+                            </strong> <span class="text-danger" style="font-size: large;">$<span th:text="${shoppingCart.grandTotal}"></span></span>
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end of container -->
+
+    <div th:replace="common/header :: body-bottom-scripts"></div>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+</body>
+</html>

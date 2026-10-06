@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1000/xhtml">
+<head th:replace="common/header :: common-header"></head>
+<body>
+    <div th:replace="common/header :: navbar"></div>
+
+    <div class="container">
+        <div class="row mb-5">
+            <div class="col-8">
+                <h2 class="section-headline">
+                    <span>User Account</span>
+                </h2>
+            </div>
+            <div class="col-4">
+                <img src="/image/logo.png" class="img-fluid" />
+            </div>
+        </div>
+        <hr class="position-absolute w-100" style="height: 6px; background-color: #333; z-index: -1; top: -80px;" />
+        <img class="img-fluid" src="/image/wood.png" style="margin-top: -75px;" />
+
+        <div class="row mt-2">
+            <div class="col-12">
+                <div class="alert alert-success">
+                    <h3>
+                        <i class="fa fa-check" aria-hidden="true" style="color: limegreen;"></i> Thank you, your order has been placed.
+                    </h3>
+                    <h4>
+                        The estimated delivery date is <span th:text="${estimatedDeliveryDate}"></span>
+                    </h4>
+                </div>
+
+                <h3>List of Items</h3>
+                <div class="row" th:each="cartItem : ${cartItemList}">
+                    <hr />
+                    <div class="col-2"></div>
+                    <div class="col-2">
+                        <a th:href="@{/breadDetail(id=${cartItem.bread.id})}">
+                            <img class="img-fluid shelf-bread"
+                                 th:src="@{'/image/bread/' + ${cartItem.bread.id} + '.png'}"
+                                 style="width: 70px;" />
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <div class="ms-3">
+                            <a th:href="@{/breadDetail(id=${cartItem.bread.id})}">
+                                <h4 th:text="${cartItem.bread.title}"></h4>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <h5 class="text-danger fs-5">
+                            $<span th:text="${cartItem.bread.ourPrice}" th:style="${cartItem.bread.inStockNumber} == 0 ? 'text-decoration: line-through' : ''"></span>
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- end of container -->
+
+    <div th:replace="common/header :: body-bottom-scripts" />
+</body>
+</html>

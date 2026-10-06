@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="common/header :: common-header"></head>
+<body>
+    <div th:replace="common/header :: navbar"></div>
+
+    <div class="container">
+        <div class="row">
+            <form class="form-horizontal" th:action="@{/home/bread/add}" method="post" enctype="multipart/form-data">
+                <fieldset>
+                    <legend>New Bread Information<span style="font-size: small"> * is a required field</span></legend>
+
+                    <!-- Bread Title -->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="title">* Title</label>
+                        <div class="col-md-8">
+                            <input type="text" name="title" class="form-control" id="title" th:field="${bread.title}" required="required" placeholder="Title of the Bread" />
+                        </div>
+                    </div>
+                   
+                    <!-- Baker -->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="baker">Baker</label>
+                        <div class="col-md-8">
+                            <input type="text" name="baker" class="form-control" id="baker" th:value="${bread.baker}" placeholder="Baker's Name" />
+                        </div>
+                    </div>
+
+                    <!-- Type -->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="type">Type</label>
+                        <div class="col-md-8">
+                            <input type="text" name="type" class="form-control" id="type" th:value="${bread.type}" placeholder="Type of Bread" />
+                        </div>
+                    </div>
+
+                    <!-- Bake Date -->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="bakeDate">Bake Date</label>
+                        <div class="col-md-8">
+                            <input type="date" name="bakeDate" class="form-control" id="bakeDate" th:value="${bread.bakeDate}" placeholder="Bake Date" />
+                        </div>
+                    </div>
+
+                    <!-- Ingredients -->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="ingredients">Ingredients</label>
+                        <div class="col-md-8">
+                            <input type="text" name="ingredients" class="form-control" id="ingredients" th:value="${bread.ingredients}" placeholder="Ingredients Used" />
+                        </div>
+                    </div>
+
+                    <!-- Category -->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="category">Category</label>
+                        <div class="col-md-8">
+                            <input type="text" name="category" class="form-control" id="category" th:value="${bread.category}" placeholder="Category of Bread" />
+                        </div>
+                    </div>
+
+                    <!-- Weight -->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="weight">Weight</label>
+                        <div class="col-md-8">
+                            <input type="number" name="weight" class="form-control" id="weight" th:value="${bread.weight}" placeholder="Weight in Ounces" />
+                        </div>
+                    </div>
+                    
+                    <!-- in stock number -->
+					<div class="form-group">
+						<label class="col-md-2 control-label" for="inStockNumber">Number
+							in stock</label>
+						<div class="col-md-8">
+							<input th:value="${bread.inStockNumber}" type="number"
+								name="inStockNumber" class="form-control" id="inStockNumber"
+								placeholder="Number of bread in-stock " /> <span
+								class="help-block">Number of bread in-stock </span>
+						</div>
+					</div>
+
+                    <!-- Size -->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="size">Size</label>
+                        <div class="col-md-8">
+                            <input type="text" name="size" class="form-control" id="size" th:value="${bread.size}" placeholder="Size of Bread" />
+                        </div>
+                    </div>
+
+                    <!-- SKU -->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="sku">SKU</label>
+                        <div class="col-md-8">
+                            <input type="text" name="sku" class="form-control" id="sku" th:value="${bread.sku}" placeholder="SKU Number" />
+                        </div>
+                    </div>
+                    
+                    
+                    
+                    <!-- format -->
+					<div class="form-group">
+						<label class="col-md-2 control-label" for="format">Format</label>
+						<div class="col-md-8">
+							<select th:value="${bread.format}" id="format" name="format"
+								class="form-control">
+								<option value="paperback">Paperback</option>
+								<option value="hardcover">Hardcover</option>
+							</select>
+						</div>
+					</div>
+                    
+                  
+
+                    <!-- Shipping Weight -->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="shippingWeight">Shipping Weight</label>
+                        <div class="col-md-8">
+                            <input type="number" name="shippingWeight" class="form-control" id="shippingWeight" th:value="${bread.shippingWeight}" placeholder="Shipping Weight" />
+                        </div>
+                    </div>
+
+                    <!-- List Price -->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="listPrice">List Price</label>
+                        <div class="col-md-8">
+                            <input type="number" name="listPrice" class="form-control" id="listPrice" th:value="${bread.listPrice}" placeholder="List Price" />
+                        </div>
+                    </div>
+
+                    <!-- Our Price -->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="ourPrice">Our Price</label>
+                        <div class="col-md-8">
+                            <div class="input-group">
+                                <span class="input-group-addon">$</span> 
+                                <input type="number" name="ourPrice" class="form-control" id="ourPrice" th:value="${bread.ourPrice}" placeholder="Our Price" />
+                            </div>
+                            <span class="help-block">Enter the price of the bread</span>
+                        </div>
+                    </div>
+
+                    <!-- Active -->
+                    <div class="form-group">
+                         <label class="col-md-2 control-label" for="active">Active</label>
+                         <div class="col-md-8">
+                         <label><input type="checkbox" name="active" id="active" th:checked="${bread.active}" /> Active</label>
+                    </div>
+                    </div>
+                                                         
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label class="col-md-2 control-label" for="description">Description</label>
+                        <div class="col-md-8">
+                            <textarea name="description" rows="5" class="form-control" id="description" th:value="${bread.description}" placeholder="Description"></textarea>
+                        </div>
+                    </div>
+
+                   <!-- upload image -->
+					<div class="form-group">
+						<div class="col-md-2">
+							<label for="breadImage">Upload bread image</label>
+						</div>
+						<div class="col-md-8">
+							<input id="breadImage" type="file" name="breadImage"
+								th:value="${bread.breadImage}" />
+						</div>
+					</div>
+
+                    <div class="form-group">
+                        <div class="col-md-8 col-md-offset-2">
+                            <button type="submit" class="btn btn-success">Add Bread</button>
+                            <a class="btn btn-danger" href="/">Cancel</a>
+                        </div>
+                    </div>
+                    
+                </fieldset>
+            </form>
+        </div>
+    </div>
+
+   
