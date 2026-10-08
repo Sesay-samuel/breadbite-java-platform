@@ -1,9 +1,7 @@
+
 package com.adminportal.utility;
 
-
-
 import java.security.SecureRandom;
-import java.util.Random;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -11,24 +9,24 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class SecurityUtility {
-	private static final String SALT = "salt"; // Salt should be protected carefully
-	
+
+	private static final String PASSWORD_CHARACTERS = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789";
+
+	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
 	@Bean
 	public static BCryptPasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder(12, new SecureRandom(SALT.getBytes()));
+		return new BCryptPasswordEncoder(12);
 	}
-	
-	@Bean
+
 	public static String randomPassword() {
-		String SALTCHARS = "ABCEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-		StringBuilder salt = new StringBuilder();
-		Random rnd = new Random();
-		
-		while (salt.length()<18) {
-			int index= (int) (rnd.nextFloat()*SALTCHARS.length());
-			salt.append(SALTCHARS.charAt(index));
+		StringBuilder password = new StringBuilder();
+
+		for (int i = 0; i < 18; i++) {
+			int index = SECURE_RANDOM.nextInt(PASSWORD_CHARACTERS.length());
+			password.append(PASSWORD_CHARACTERS.charAt(index));
 		}
-		String saltStr = salt.toString();
-		return saltStr;
+
+		return password.toString();
 	}
 }
