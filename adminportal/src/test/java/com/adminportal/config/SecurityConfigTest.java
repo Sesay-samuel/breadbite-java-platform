@@ -2,9 +2,8 @@
 package com.adminportal.config;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
@@ -169,4 +168,70 @@ class SecurityConfigTest {
 
         verify(breadService).save(any(Bread.class));
     }
+
+    @Test
+    void administratorCannotUploadFakePng() throws Exception {
+
+        MockMultipartFile fakePng = new MockMultipartFile(
+                "breadImage",
+                "fake.png",
+                "image/png",
+                new byte[] { 1, 2, 3, 4 });
+
+        mockMvc.perform(
+                multipart("/home/bread/add")
+                        .file(fakePng)
+                        .param("title", "Test Bread")
+                        .with(user("administrator").roles("ADMIN"))
+                        .with(csrf()))
+                .andExpect(status().isBadRequest());
+
+        verify(breadService, never()).save(any(Bread.class));
+    }
+
+    @Test
+    void administratorCannotUploadOversizedImage() throws Exception {
+
+        byte[] oversizedImage = new byte[5 * 1024 * 1024 + 1];
+
+        MockMultipartFile image = new MockMultipartFile(
+                "breadImage",
+                "large.png",
+                "image/png",
+                oversizedImage);
+
+        mockMvc.perform(
+                multipart("/home/bread/add")
+                        .file(image)
+                        .param("title", "Test Bread")
+                        .with(user("administrator").roles("ADMIN"))
+                        .with(csrf()))
+                .andExpect(status().isBadRequest());
+
+        verify(breadService, never()).save(any(Bread.class));
+    }
+
+    @Test
+    void customerCannotUploadBreadImage() throws Exception {
+
+        MockMultipartFile image = new MockMultipartFile(
+                "breadImage",
+                "bread.png",
+                "image/png",
+                new byte[] {
+                        (byte) 0x89, 0x50, 0x4E, 0x47,
+                        0x0D, 0x0A, 0x1A, 0x0A
+                });
+
+        mockMvc.perform(
+                multipart("/home/bread/add")
+                        .file(image)
+                        .param("title", "Test Bread")
+                        .with(user("customer").roles("USER"))
+                        .with(csrf()))
+                .andExpect(status().isForbidden());
+
+        verify(breadService, never()).save(any(Bread.class));
+    }
+
 }
