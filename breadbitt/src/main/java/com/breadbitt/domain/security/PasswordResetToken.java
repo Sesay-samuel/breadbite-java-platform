@@ -1,3 +1,4 @@
+
 package com.breadbitt.domain.security;
 
 import java.util.Calendar;
@@ -5,6 +6,7 @@ import java.util.Date;
 
 import com.breadbitt.domain.User;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -16,40 +18,51 @@ import jakarta.persistence.OneToOne;
 @Entity
 public class PasswordResetToken {
 
-	private static final int EXPIRATION = 60 * 24;
-	
+	private static final int EXPIRATION = 15;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
-	
+
+	@Column(nullable = false, length = 64)
 	private String token;
-	
+
 	@OneToOne(targetEntity = User.class, fetch = FetchType.EAGER)
-	@JoinColumn(nullable=false, name="user_id")
+	@JoinColumn(nullable = false, name = "user_id")
 	private User user;
-	
+
 	private Date expiryDate;
-	
-	public PasswordResetToken(){}
-	
-	public PasswordResetToken(final String token, final User user) {
-		super ();
-		
+
+	public PasswordResetToken() {
+	}
+
+	public PasswordResetToken(
+			final String token,
+			final User user) {
+
 		this.token = token;
 		this.user = user;
 		this.expiryDate = calculateExpiryDate(EXPIRATION);
 	}
-	
-	private Date calculateExpiryDate (final int expiryTimeInMinutes) {
-		final Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(new Date().getTime());
-		cal.add(Calendar.MINUTE, expiryTimeInMinutes);
-		return new Date(cal.getTime().getTime());
+
+	private Date calculateExpiryDate(
+			final int expiryTimeInMinutes) {
+
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(System.currentTimeMillis());
+		calendar.add(Calendar.MINUTE, expiryTimeInMinutes);
+
+		return calendar.getTime();
 	}
-	
+
 	public void updateToken(final String token) {
 		this.token = token;
 		this.expiryDate = calculateExpiryDate(EXPIRATION);
+	}
+
+	public boolean isExpired() {
+		return expiryDate == null
+				|| !expiryDate.after(new Date());
 	}
 
 	public Long getId() {
@@ -90,10 +103,8 @@ public class PasswordResetToken {
 
 	@Override
 	public String toString() {
-		return "PasswordResetToken [id=" + id + ", token=" + token + ", user=" + user + ", expiryDate=" + expiryDate
+		return "PasswordResetToken [id=" + id
+				+ ", expiryDate=" + expiryDate
 				+ "]";
 	}
-	
-	
 }
-

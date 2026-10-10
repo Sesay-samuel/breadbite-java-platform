@@ -1,7 +1,11 @@
 
 package com.breadbitt.service.impl;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -9,6 +13,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +42,8 @@ public class UserServiceImpl implements UserService {
 
 	private static final String CUSTOMER_ROLE = "ROLE_USER";
 
+	private static final BCryptPasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder(12);
+
 	@Autowired
 	private UserRepository userRepository;
 
@@ -53,24 +60,135 @@ public class UserServiceImpl implements UserService {
 	private PasswordResetTokenRepository passwordResetTokenRepository;
 
 	// ========================================
-	// PASSWORD RESET
+	// PASSWORD RESET TOKEN LOOKUP
 	// ========================================
 
 	@Override
+	@Transactional(readOnly = true)
 	public PasswordResetToken getPasswordResetToken(
 			final String token) {
 
-		return passwordResetTokenRepository.findByToken(token);
+		if (token == null || token.isBlank()) {
+			return null;
+		}
+
+		String tokenHash = hashResetToken(token);
+
+		PasswordResetToken resetToken = passwordResetTokenRepository.findByToken(tokenHash);
+
+		if (resetToken == null || resetToken.isExpired()) {
+			return null;
+		}
+
+		return resetToken;
 	}
 
+	// ========================================
+	// CREATE OR REPLACE RESET TOKEN
+	// ========================================
+
 	@Override
+	@Transactional
 	public void createPasswordResetTokenForUser(
 			final User user,
 			final String token) {
 
-		final PasswordResetToken myToken = new PasswordResetToken(token, user);
+		if (user == null || token == null || token.isBlank()) {
+			throw new IllegalArgumentException(
+					"User and reset token are required");
+		}
 
-		passwordResetTokenRepository.save(myToken);
+		String tokenHash = hashResetToken(token);
+
+		PasswordResetToken existingToken = passwordResetTokenRepository.findByUser(user);
+
+		if (existingToken != null) {
+
+			existingToken.updateToken(tokenHash);
+
+			passwordResetTokenRepository.save(existingToken);
+
+		} else {
+
+			PasswordResetToken newToken = new PasswordResetToken(tokenHash, user);
+
+			passwordResetTokenRepository.save(newToken);
+		}
+	}
+
+	// ========================================
+	// SECURE SINGLE-USE PASSWORD RESET
+	// ========================================
+
+	@Override
+	@Transactional
+	public boolean resetPassword(
+			final String token,
+			final String newPassword) {
+
+		if (token == null || token.isBlank()
+				|| newPassword == null
+				|| newPassword.length() < 12
+				|| newPassword.length() > 128) {
+
+			return false;
+		}
+
+		String tokenHash = hashResetToken(token);
+
+		Optional<PasswordResetToken> tokenOptional = passwordResetTokenRepository
+				.findByTokenForUpdate(tokenHash);
+
+		if (tokenOptional.isEmpty()) {
+			return false;
+		}
+
+		PasswordResetToken resetToken = tokenOptional.get();
+
+		if (resetToken.isExpired()) {
+			return false;
+		}
+
+		User user = resetToken.getUser();
+
+		if (user == null) {
+			return false;
+		}
+
+		// Hash the new password using BCrypt.
+		user.setPassword(
+				PASSWORD_ENCODER.encode(newPassword));
+
+		userRepository.save(user);
+
+		// Consume the reset token in the same transaction.
+		passwordResetTokenRepository.delete(resetToken);
+
+		LOG.info("Customer password reset completed successfully");
+
+		return true;
+	}
+
+	// ========================================
+	// SHA-256 TOKEN HASHING
+	// ========================================
+
+	private String hashResetToken(final String token) {
+
+		try {
+
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+			byte[] hash = digest.digest(
+					token.getBytes(StandardCharsets.UTF_8));
+
+			return HexFormat.of().formatHex(hash);
+
+		} catch (NoSuchAlgorithmException exception) {
+
+			throw new IllegalStateException(
+					"SHA-256 is unavailable", exception);
+		}
 	}
 
 	// ========================================
@@ -79,11 +197,13 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User findByUsername(String username) {
+
 		return userRepository.findByUsername(username);
 	}
 
 	@Override
 	public User findById(Long id) {
+
 		Optional<User> optionalUser = userRepository.findById(id);
 
 		return optionalUser.orElse(null);
@@ -91,6 +211,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User findByEmail(String email) {
+
 		return userRepository.findByEmail(email);
 	}
 
@@ -104,9 +225,9 @@ public class UserServiceImpl implements UserService {
 			User user,
 			Set<UserRole> userRoles) {
 
-		if (user == null ||
-				user.getUsername() == null ||
-				user.getUsername().isBlank()) {
+		if (user == null
+				|| user.getUsername() == null
+				|| user.getUsername().isBlank()) {
 
 			throw new IllegalArgumentException(
 					"A valid username is required");
@@ -126,37 +247,36 @@ public class UserServiceImpl implements UserService {
 		// Find the existing customer role.
 		Role customerRole = roleRepository.findByName(CUSTOMER_ROLE);
 
-		// Create the customer role only if it does not exist.
+		// Create the customer role if it does not exist.
 		if (customerRole == null) {
 
 			customerRole = new Role();
+
 			customerRole.setRoleId(1);
 			customerRole.setName(CUSTOMER_ROLE);
 
 			customerRole = roleRepository.save(customerRole);
 		}
 
-		// Never trust caller-supplied roles during
-		// public customer registration.
+		// Never accept caller-supplied administrative roles.
 		UserRole customerUserRole = new UserRole(user, customerRole);
 
 		user.getUserRoles().clear();
 		user.getUserRoles().add(customerUserRole);
 
-		// Create a shopping cart for the new user.
+		// Create a shopping cart.
 		ShoppingCart shoppingCart = new ShoppingCart();
 		shoppingCart.setUser(user);
 
 		user.setShoppingCart(shoppingCart);
 
-		// Initialize payment and shipping collections.
+		// Initialize shipping and payment collections.
 		user.setUserShippingList(
 				new ArrayList<UserShipping>());
 
 		user.setUserPaymentList(
 				new ArrayList<UserPayment>());
 
-		// Persist the customer and associated entities.
 		User savedUser = userRepository.save(user);
 
 		LOG.info(
@@ -171,6 +291,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User save(User user) {
+
 		return userRepository.save(user);
 	}
 
@@ -185,7 +306,9 @@ public class UserServiceImpl implements UserService {
 			User user) {
 
 		userPayment.setUser(user);
+
 		userPayment.setUserBilling(userBilling);
+
 		userPayment.setDefaultPayment(true);
 
 		userBilling.setUserPayment(userPayment);
@@ -205,6 +328,7 @@ public class UserServiceImpl implements UserService {
 			User user) {
 
 		userShipping.setUser(user);
+
 		userShipping.setUserShippingDefault(true);
 
 		user.getUserShippingList().add(userShipping);

@@ -1,3 +1,4 @@
+
 package com.breadbitt.service;
 
 import java.util.Set;
@@ -10,26 +11,77 @@ import com.breadbitt.domain.security.PasswordResetToken;
 import com.breadbitt.domain.security.UserRole;
 
 public interface UserService {
-    
-PasswordResetToken getPasswordResetToken(final String token);
-	
-	void createPasswordResetTokenForUser(final User user, final String token);
-	
+
+	// ========================================
+	// PASSWORD RESET
+	// ========================================
+
+	PasswordResetToken getPasswordResetToken(
+			final String token);
+
+	void createPasswordResetTokenForUser(
+			final User user,
+			final String token);
+
+	// Secure, single-use password reset.
+	boolean resetPassword(
+			String token,
+			String newPassword);
+
+	// ========================================
+	// USER LOOKUP
+	// ========================================
+
 	User findByUsername(String username);
-	
-	User findByEmail (String email);
-	
+
+	User findByEmail(String email);
+
 	User findById(Long id);
-	
-	User createUser(User user, Set<UserRole> userRoles) throws Exception;
-	
+
+	// ========================================
+	// CUSTOMER REGISTRATION
+	// ========================================
+
+	User createUser(
+			User user,
+			Set<UserRole> userRoles) throws Exception;
+
+	// ========================================
+	// SAVE USER
+	// ========================================
+
 	User save(User user);
-	
-	void updateUserBilling(UserBilling userBilling, UserPayment userPayment, User user);
-	
-	void updateUserShipping(UserShipping userShipping, User user);
-	
-	void setUserDefaultPayment(Long userPaymentId, User user);
-	
-	void setUserDefaultShipping(Long userShippingId, User user);
+
+	// ========================================
+	// USER BILLING
+	// ========================================
+
+	void updateUserBilling(
+			UserBilling userBilling,
+			UserPayment userPayment,
+			User user);
+
+	// ========================================
+	// USER SHIPPING
+	// ========================================
+
+	void updateUserShipping(
+			UserShipping userShipping,
+			User user);
+
+	// ========================================
+	// DEFAULT PAYMENT
+	// ========================================
+
+	void setUserDefaultPayment(
+			Long userPaymentId,
+			User user);
+
+	// ========================================
+	// DEFAULT SHIPPING
+	// ========================================
+
+	void setUserDefaultShipping(
+			Long userShippingId,
+			User user);
 }
