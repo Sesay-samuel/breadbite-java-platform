@@ -136,7 +136,16 @@
             <scope>test</scope>
         </dependency>
 
+
+                                                  <!-- Apache Kafka event-driven messaging -->
+         <dependency>
+           <groupId>org.springframework.kafka</groupId>
+           <artifactId>spring-kafka</artifactId>
+        </dependency>
+
     </dependencies>
+
+                                   
 
     <build>
         <plugins>
