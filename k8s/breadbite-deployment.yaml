@@ -1,0 +1,38 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: breadbite-app
+  labels:
+    app: breadbite-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: breadbite-app
+  template:
+    metadata:
+      labels:
+        app: breadbite-app
+    spec:
+      containers:
+        - name: breadbite-app
+          image: breadbite-app:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8098
+              name: http
+
+          envFrom:
+            - configMapRef:
+                name: breadbite-config
+            - secretRef:
+                name: breadbite-secrets
+
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "250m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
