@@ -13,6 +13,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +23,6 @@ import com.breadbitt.domain.User;
 import com.breadbitt.domain.UserBilling;
 import com.breadbitt.domain.UserPayment;
 import com.breadbitt.domain.UserShipping;
-
 import com.breadbitt.domain.security.PasswordResetToken;
 import com.breadbitt.domain.security.Role;
 import com.breadbitt.domain.security.UserRole;
@@ -105,7 +105,6 @@ public class UserServiceImpl implements UserService {
 		if (existingToken != null) {
 
 			existingToken.updateToken(tokenHash);
-
 			passwordResetTokenRepository.save(existingToken);
 
 		} else {
@@ -126,7 +125,8 @@ public class UserServiceImpl implements UserService {
 			final String token,
 			final String newPassword) {
 
-		if (token == null || token.isBlank()
+		if (token == null
+				|| token.isBlank()
 				|| newPassword == null
 				|| newPassword.length() < 12
 				|| newPassword.length() > 128) {
@@ -155,16 +155,16 @@ public class UserServiceImpl implements UserService {
 			return false;
 		}
 
-		// Hash the new password using BCrypt.
 		user.setPassword(
 				PASSWORD_ENCODER.encode(newPassword));
 
 		userRepository.save(user);
 
-		// Consume the reset token in the same transaction.
+		// Consume the token in the same transaction.
 		passwordResetTokenRepository.delete(resetToken);
 
-		LOG.info("Customer password reset completed successfully");
+		LOG.info(
+				"Customer password reset completed successfully");
 
 		return true;
 	}
@@ -197,7 +197,6 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User findByUsername(String username) {
-
 		return userRepository.findByUsername(username);
 	}
 
@@ -211,7 +210,6 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User findByEmail(String email) {
-
 		return userRepository.findByEmail(email);
 	}
 
@@ -233,7 +231,8 @@ public class UserServiceImpl implements UserService {
 					"A valid username is required");
 		}
 
-		User existingUser = userRepository.findByUsername(user.getUsername());
+		User existingUser = userRepository.findByUsername(
+				user.getUsername());
 
 		if (existingUser != null) {
 
@@ -247,11 +246,10 @@ public class UserServiceImpl implements UserService {
 		// Find the existing customer role.
 		Role customerRole = roleRepository.findByName(CUSTOMER_ROLE);
 
-		// Create the customer role if it does not exist.
+		// Create the role if it does not exist.
 		if (customerRole == null) {
 
 			customerRole = new Role();
-
 			customerRole.setRoleId(1);
 			customerRole.setName(CUSTOMER_ROLE);
 
@@ -267,7 +265,6 @@ public class UserServiceImpl implements UserService {
 		// Create a shopping cart.
 		ShoppingCart shoppingCart = new ShoppingCart();
 		shoppingCart.setUser(user);
-
 		user.setShoppingCart(shoppingCart);
 
 		// Initialize shipping and payment collections.
@@ -291,7 +288,6 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User save(User user) {
-
 		return userRepository.save(user);
 	}
 
@@ -300,22 +296,57 @@ public class UserServiceImpl implements UserService {
 	// ========================================
 
 	@Override
+	@Transactional
 	public void updateUserBilling(
 			UserBilling userBilling,
 			UserPayment userPayment,
 			User user) {
 
-		userPayment.setUser(user);
+		if (userBilling == null
+				|| userPayment == null
+				|| user == null
+				|| user.getId() == null) {
 
+			throw new IllegalArgumentException(
+					"Valid billing, payment and user are required");
+		}
+
+		User managedUser = userRepository.findById(user.getId())
+				.orElseThrow(
+						() -> new IllegalArgumentException(
+								"User not found"));
+
+		// Do not allow a new-payment operation to overwrite
+		// another customer's existing payment record.
+		if (userPayment.getId() != null) {
+			throw new IllegalArgumentException(
+					"Use a dedicated update operation to edit payment details");
+		}
+
+		userPayment.setId(null);
+		userPayment.setUser(managedUser);
 		userPayment.setUserBilling(userBilling);
 
-		userPayment.setDefaultPayment(true);
-
+		userBilling.setId(null);
 		userBilling.setUserPayment(userPayment);
 
-		user.getUserPaymentList().add(userPayment);
+		// Preserve the existing default where one exists.
+		List<UserPayment> existingPayments = userPaymentRepository.findByUser_Id(
+				managedUser.getId());
 
-		save(user);
+		boolean hasDefault = existingPayments.stream()
+				.anyMatch(UserPayment::isDefaultPayment);
+
+		userPayment.setDefaultPayment(!hasDefault);
+
+		// Persist through the existing user mapping.
+		// This collection is accessed inside a transaction.
+		managedUser.getUserPaymentList().add(userPayment);
+
+		userRepository.save(managedUser);
+
+		LOG.info(
+				"Customer billing and payment method saved");
 	}
 
 	// ========================================
@@ -323,68 +354,145 @@ public class UserServiceImpl implements UserService {
 	// ========================================
 
 	@Override
+	@Transactional
 	public void updateUserShipping(
 			UserShipping userShipping,
 			User user) {
 
-		userShipping.setUser(user);
+		if (userShipping == null
+				|| user == null
+				|| user.getId() == null) {
 
-		userShipping.setUserShippingDefault(true);
+			throw new IllegalArgumentException(
+					"Valid user and shipping address are required");
+		}
 
-		user.getUserShippingList().add(userShipping);
+		Long userId = user.getId();
 
-		save(user);
+		// Load a managed user within the transaction.
+		User managedUser = userRepository.findById(userId)
+				.orElseThrow(
+						() -> new IllegalArgumentException(
+								"User not found"));
+
+		// This method creates a new shipping address.
+		// Existing addresses require a separate,
+		// ownership-checked update operation.
+		if (userShipping.getId() != null) {
+			throw new IllegalArgumentException(
+					"Use the dedicated update operation to edit an address");
+		}
+
+		// The server sets ownership.
+		userShipping.setId(null);
+		userShipping.setUser(managedUser);
+
+		List<UserShipping> existingAddresses = userShippingRepository.findByUser_Id(userId);
+
+		boolean hasDefault = existingAddresses.stream()
+				.anyMatch(UserShipping::isUserShippingDefault);
+
+		// The first address becomes the default.
+		userShipping.setUserShippingDefault(!hasDefault);
+
+		// Save directly without touching the detached
+		// user's lazy-loaded shipping collection.
+		userShippingRepository.save(userShipping);
+
+		LOG.info(
+				"Customer shipping address saved successfully");
 	}
 
 	// ========================================
-	// DEFAULT PAYMENT
+	// SECURE DEFAULT PAYMENT
 	// ========================================
 
 	@Override
+	@Transactional
 	public void setUserDefaultPayment(
 			Long userPaymentId,
 			User user) {
 
-		List<UserPayment> userPaymentList = (List<UserPayment>) userPaymentRepository.findAll();
+		if (user == null
+				|| user.getId() == null
+				|| userPaymentId == null) {
 
-		for (UserPayment userPayment : userPaymentList) {
-
-			if (userPayment.getId().equals(userPaymentId)) {
-
-				userPayment.setDefaultPayment(true);
-
-			} else {
-
-				userPayment.setDefaultPayment(false);
-			}
-
-			userPaymentRepository.save(userPayment);
+			throw new IllegalArgumentException(
+					"Valid user and payment ID are required");
 		}
+
+		// Only retrieve payment methods owned by this user.
+		List<UserPayment> userPayments = userPaymentRepository.findByUser_Id(
+				user.getId());
+
+		// Reject IDs that do not belong to the user.
+		boolean ownsPayment = userPayments.stream()
+				.anyMatch(
+						payment -> userPaymentId.equals(
+								payment.getId()));
+
+		if (!ownsPayment) {
+			throw new AccessDeniedException(
+					"Payment method does not belong to this user");
+		}
+
+		// Change defaults only within this user's records.
+		for (UserPayment payment : userPayments) {
+
+			payment.setDefaultPayment(
+					userPaymentId.equals(payment.getId()));
+		}
+
+		userPaymentRepository.saveAll(userPayments);
+
+		LOG.info(
+				"Customer default payment method updated");
 	}
 
 	// ========================================
-	// DEFAULT SHIPPING
+	// SECURE DEFAULT SHIPPING
 	// ========================================
 
 	@Override
+	@Transactional
 	public void setUserDefaultShipping(
 			Long userShippingId,
 			User user) {
 
-		List<UserShipping> userShippingList = (List<UserShipping>) userShippingRepository.findAll();
+		if (user == null
+				|| user.getId() == null
+				|| userShippingId == null) {
 
-		for (UserShipping userShipping : userShippingList) {
-
-			if (userShipping.getId().equals(userShippingId)) {
-
-				userShipping.setUserShippingDefault(true);
-
-			} else {
-
-				userShipping.setUserShippingDefault(false);
-			}
-
-			userShippingRepository.save(userShipping);
+			throw new IllegalArgumentException(
+					"Valid user and shipping ID are required");
 		}
+
+		// Only retrieve addresses owned by this user.
+		List<UserShipping> userShippingList = userShippingRepository.findByUser_Id(
+				user.getId());
+
+		// Reject IDs that do not belong to the user.
+		boolean ownsShipping = userShippingList.stream()
+				.anyMatch(
+						shipping -> userShippingId.equals(
+								shipping.getId()));
+
+		if (!ownsShipping) {
+			throw new AccessDeniedException(
+					"Shipping address does not belong to this user");
+		}
+
+		// Change defaults only within this user's records.
+		for (UserShipping shipping : userShippingList) {
+
+			shipping.setUserShippingDefault(
+					userShippingId.equals(
+							shipping.getId()));
+		}
+
+		userShippingRepository.saveAll(userShippingList);
+
+		LOG.info(
+				"Customer default shipping address updated");
 	}
 }

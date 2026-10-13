@@ -1,402 +1,915 @@
-
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{common/header :: common-header}"></head>
+<html lang="en"
+
+      xmlns:th="http://www.thymeleaf.org">
+
+
+
+<head th:replace="~{common/header :: common-header}">
+
+    <title>My Account - BreadBite</title>
+
+</head>
+
+
 
 <body>
 
+
+
 <div th:replace="~{common/header :: navbar}"></div>
 
-<div class="container">
+
+
+<main class="container py-4">
+
+
 
     <!-- PAGE HEADER -->
-    <div class="row" style="margin-bottom: -20px;">
-        <div class="col-8">
-            <h2 class="section-headline">
-                <span>User Account</span>
-            </h2>
+
+    <div class="row align-items-center mb-3">
+
+
+
+        <div class="col-md-8">
+
+            <h2 class="fw-bold">User Account</h2>
+
+            <p class="text-muted">
+
+                Create an account, log in, or recover your password.
+
+            </p>
+
         </div>
 
-        <div class="col-md-4">
+
+
+        <div class="col-md-4 text-md-end">
+
             <img th:src="@{/image/logo.png}"
+
                  class="img-fluid"
-                 alt="Logo">
+
+                 alt="BreadBite Logo"
+
+                 style="max-height: 100px;">
+
         </div>
+
+
+
     </div>
 
-    <hr class="position-absolute w-100"
-        style="height: 6px; background-color: #333;
-               z-index: -1; margin-top: -80px;">
 
-    <img class="img-fluid"
-         th:src="@{/image/wood.png}"
-         alt="Wood Image"
-         style="margin-top: -75px;">
 
-    <div class="row" style="margin-top: 60px;">
-        <div class="col-9 offset-3">
+    <hr>
+
+
+
+    <div class="text-center mb-4">
+
+        <img th:src="@{/image/wood.png}"
+
+             class="img-fluid rounded"
+
+             alt="BreadBite bakery"
+
+             style="max-height: 180px; width: 100%; object-fit: cover;">
+
+    </div>
+
+
+
+    <div class="row justify-content-center">
+
+        <div class="col-lg-9 col-xl-8">
+
+
 
             <!-- ACCOUNT TABS -->
-            <ul class="nav nav-tabs" role="tablist">
 
-                <!-- CREATE ACCOUNT TAB -->
+            <ul class="nav nav-tabs"
+
+                id="accountTabs"
+
+                role="tablist">
+
+
+
+                <!-- CREATE ACCOUNT -->
+
                 <li class="nav-item" role="presentation">
-                    <a href="#tab-1"
-                       class="nav-link"
-                       th:classappend="${classActiveNewAccount == true} ? 'active' : ''"
-                       data-bs-toggle="tab"
-                       role="tab">
 
-                        <span style="color: blue;">
-                            Create new account
-                        </span>
-                    </a>
+
+
+                    <button class="nav-link"
+
+                            th:classappend="${classActiveNewAccount == true} ? 'active' : ''"
+
+                            id="register-tab"
+
+                            data-bs-toggle="tab"
+
+                            data-bs-target="#register"
+
+                            type="button"
+
+                            role="tab"
+
+                            aria-controls="register"
+
+                            th:attr="aria-selected=${classActiveNewAccount == true}">
+
+
+
+                        <i class="bi bi-person-plus"></i>
+
+                        Create New Account
+
+
+
+                    </button>
+
+
+
                 </li>
 
-                <!-- LOGIN TAB -->
-                <li class="nav-item" role="presentation">
-                    <a href="#tab-2"
-                       class="nav-link"
-                       th:classappend="${(classActiveLogin == true) or ((classActiveNewAccount != true) and (classActiveForgetPassword != true))} ? 'active' : ''"
-                       data-bs-toggle="tab"
-                       role="tab">
 
-                        <span style="color: blue;">
-                            Log in
-                        </span>
-                    </a>
+
+                <!-- LOGIN -->
+
+                <li class="nav-item" role="presentation">
+
+
+
+                    <button class="nav-link"
+
+                            th:classappend="${classActiveLogin == true or (classActiveNewAccount != true and classActiveForgetPassword != true)} ? 'active' : ''"
+
+                            id="login-tab"
+
+                            data-bs-toggle="tab"
+
+                            data-bs-target="#login"
+
+                            type="button"
+
+                            role="tab"
+
+                            aria-controls="login"
+
+                            th:attr="aria-selected=${classActiveLogin == true or (classActiveNewAccount != true and classActiveForgetPassword != true)}">
+
+
+
+                        <i class="bi bi-box-arrow-in-right"></i>
+
+                        Log In
+
+
+
+                    </button>
+
+
+
                 </li>
 
-                <!-- FORGOT PASSWORD TAB -->
-                <li class="nav-item" role="presentation">
-                    <a href="#tab-3"
-                       class="nav-link"
-                       th:classappend="${classActiveForgetPassword == true} ? 'active' : ''"
-                       data-bs-toggle="tab"
-                       role="tab">
 
-                        <span style="color: blue;">
-                            Forgot Password
-                        </span>
-                    </a>
+
+                <!-- FORGOT PASSWORD -->
+
+                <li class="nav-item" role="presentation">
+
+
+
+                    <button class="nav-link"
+
+                            th:classappend="${classActiveForgetPassword == true} ? 'active' : ''"
+
+                            id="forgot-tab"
+
+                            data-bs-toggle="tab"
+
+                            data-bs-target="#forgot"
+
+                            type="button"
+
+                            role="tab"
+
+                            aria-controls="forgot"
+
+                            th:attr="aria-selected=${classActiveForgetPassword == true}">
+
+
+
+                        <i class="bi bi-key"></i>
+
+                        Forgot Password
+
+
+
+                    </button>
+
+
+
                 </li>
+
+
 
             </ul>
 
+
+
             <!-- TAB CONTENT -->
-            <div class="tab-content">
+
+            <div class="tab-content pt-4" id="accountTabContent">
+
+
 
                 <!-- ================================= -->
+
                 <!-- CREATE NEW ACCOUNT -->
+
                 <!-- ================================= -->
 
+
+
                 <div class="tab-pane fade"
-                     id="tab-1"
+
+                     th:classappend="${classActiveNewAccount == true} ? 'show active' : ''"
+
+                     id="register"
+
                      role="tabpanel"
-                     th:classappend="${classActiveNewAccount == true} ? 'show active' : ''">
 
-                    <div class="panel-group">
-                        <div class="panel panel-default"
-                             style="border: none;">
+                     aria-labelledby="register-tab">
 
-                            <div class="panel-body"
-                                 style="background-color: #ededed;
-                                        margin-top: 20px;
-                                        padding: 20px;">
 
-                                <!-- REGISTRATION SUCCESS MESSAGE -->
-                                <div th:if="${emailSent == true}"
-                                     class="alert alert-info">
 
-                                    Your account has been created.
-                                    Check your email for a secure link
-                                    to set your password.
-                                    The link expires in 15 minutes.
+                    <div class="card shadow-sm">
+
+
+
+                        <div class="card-header bg-light">
+
+                            <h5 class="mb-0">Create Your BreadBite Account</h5>
+
+                        </div>
+
+
+
+                        <div class="card-body">
+
+
+
+                            <!-- REGISTRATION SUCCESS -->
+
+                            <div th:if="${emailSent == true}"
+
+                                 class="alert alert-info"
+
+                                 role="status">
+
+
+
+                                <i class="bi bi-envelope-check"></i>
+
+
+
+                                Your account has been created.
+
+                                Check your email for a secure link
+
+                                to set your password.
+
+
+
+                                The link expires in 15 minutes.
+
+
+
+                            </div>
+
+
+
+                            <!-- USERNAME EXISTS -->
+
+                            <div th:if="${usernameExists == true}"
+
+                                 class="alert alert-danger"
+
+                                 role="alert">
+
+
+
+                                Username already exists.
+
+                                Please choose another username.
+
+
+
+                            </div>
+
+
+
+                            <!-- EMAIL EXISTS -->
+
+                            <div th:if="${emailExists == true}"
+
+                                 class="alert alert-danger"
+
+                                 role="alert">
+
+
+
+                                Email address already exists.
+
+                                Please use another email address.
+
+
+
+                            </div>
+
+
+
+                            <form th:action="@{/newUser}"
+
+                                  method="post">
+
+
+
+                                <!-- CSRF -->
+
+                                <input type="hidden"
+
+                                       th:if="${_csrf != null}"
+
+                                       th:name="${_csrf.parameterName}"
+
+                                       th:value="${_csrf.token}">
+
+
+
+                                <!-- USERNAME -->
+
+                                <div class="mb-3">
+
+
+
+                                    <label for="newUsername"
+
+                                           class="form-label">
+
+                                        Username
+
+                                        <span class="text-danger">*</span>
+
+                                    </label>
+
+
+
+                                    <input type="text"
+
+                                           class="form-control"
+
+                                           id="newUsername"
+
+                                           name="username"
+
+                                           autocomplete="username"
+
+                                           th:value="${username}"
+
+                                           maxlength="100"
+
+                                           required>
+
+
+
+                                    <div class="form-text">
+
+                                        Choose a username for your account.
+
+                                    </div>
+
+
 
                                 </div>
 
-                                <form th:action="@{/newUser}"
-                                      method="post">
 
-                                    <!-- CSRF TOKEN -->
-                                    <input type="hidden"
-                                           th:if="${_csrf != null}"
-                                           th:name="${_csrf.parameterName}"
-                                           th:value="${_csrf.token}">
 
-                                    <!-- USERNAME -->
-                                    <div class="mb-3">
+                                <!-- EMAIL -->
 
-                                        <label for="newUsername">
-                                            * Username:
-                                        </label>
+                                <div class="mb-3">
 
-                                        <span style="color: red;"
-                                              th:if="${usernameExists == true}">
 
-                                            Username already exists.
-                                            Choose a different one.
 
-                                        </span>
+                                    <label for="registerEmail"
 
-                                        <input required
-                                               type="text"
-                                               class="form-control"
-                                               id="newUsername"
-                                               name="username"
-                                               autocomplete="username"
-                                               th:value="${username}">
+                                           class="form-label">
 
-                                        <p style="color: #828282;">
-                                            Enter your username here.
-                                        </p>
+                                        Email Address
 
-                                    </div>
+                                        <span class="text-danger">*</span>
 
-                                    <!-- EMAIL ADDRESS -->
-                                    <div class="mb-3">
+                                    </label>
 
-                                        <label for="email">
-                                            * Email Address:
-                                        </label>
 
-                                        <span style="color: red;"
-                                              th:if="${emailExists == true}">
 
-                                            Email already exists.
-                                            Choose a different one.
+                                    <input type="email"
 
-                                        </span>
+                                           class="form-control"
 
-                                        <input required
-                                               type="email"
-                                               class="form-control"
-                                               id="email"
-                                               name="email"
-                                               autocomplete="email"
-                                               th:value="${email}">
+                                           id="registerEmail"
 
-                                        <p style="color: #828282;">
-                                            Enter a valid email address.
-                                            This address will be used
-                                            for account notifications
-                                            and password recovery.
-                                        </p>
+                                           name="email"
+
+                                           autocomplete="email"
+
+                                           th:value="${email}"
+
+                                           maxlength="254"
+
+                                           required>
+
+
+
+                                    <div class="form-text">
+
+                                        We will use this address for account
+
+                                        notifications and password recovery.
 
                                     </div>
 
-                                    <!-- SUBMIT BUTTON -->
-                                    <button type="submit"
-                                            class="btn btn-primary">
 
-                                        Create new account
 
-                                    </button>
+                                </div>
 
-                                </form>
 
-                            </div>
+
+                                <!-- SUBMIT -->
+
+                                <button type="submit"
+
+                                        class="btn btn-success">
+
+
+
+                                    <i class="bi bi-person-plus"></i>
+
+                                    Create New Account
+
+
+
+                                </button>
+
+
+
+                            </form>
+
+
+
                         </div>
+
                     </div>
+
+
+
                 </div>
 
+
+
                 <!-- ================================= -->
+
                 <!-- LOGIN -->
+
                 <!-- ================================= -->
+
+
 
                 <div class="tab-pane fade"
-                     id="tab-2"
+
+                     th:classappend="${classActiveLogin == true or (classActiveNewAccount != true and classActiveForgetPassword != true)} ? 'show active' : ''"
+
+                     id="login"
+
                      role="tabpanel"
-                     th:classappend="${(classActiveLogin == true) or ((classActiveNewAccount != true) and (classActiveForgetPassword != true))} ? 'show active' : ''">
 
-                    <div class="panel-group">
-                        <div class="panel panel-default"
-                             style="border: none;">
+                     aria-labelledby="login-tab">
 
-                            <div class="panel-body"
-                                 style="background-color: #ededed;
-                                        margin-top: 20px;
-                                        padding: 20px;">
 
-                                <!-- INVALID LOGIN -->
-                                <div th:if="${param.error != null}"
-                                     class="alert alert-danger">
 
-                                    Incorrect username or password.
+                    <div class="card shadow-sm">
 
-                                </div>
 
-                                <!-- PASSWORD RESET SUCCESS -->
-                                <div th:if="${param.passwordReset != null}"
-                                     class="alert alert-success">
 
-                                    Your password has been updated.
-                                    You can now log in.
+                        <div class="card-header bg-light">
 
-                                </div>
+                            <h5 class="mb-0">Log In to BreadBite</h5>
 
-                                <!-- LOGOUT MESSAGE -->
-                                <div th:if="${param.logout != null}"
-                                     class="alert alert-info">
+                        </div>
 
-                                    You have been logged out.
 
-                                </div>
 
-                                <form th:action="@{/login}"
-                                      method="post">
+                        <div class="card-body">
 
-                                    <!-- CSRF TOKEN -->
-                                    <input type="hidden"
-                                           th:if="${_csrf != null}"
-                                           th:name="${_csrf.parameterName}"
-                                           th:value="${_csrf.token}">
 
-                                    <!-- USERNAME -->
-                                    <div class="mb-3">
 
-                                        <label for="username">
-                                            * Username:
-                                        </label>
+                            <!-- LOGIN ERROR -->
 
-                                        <input required
-                                               type="text"
-                                               class="form-control"
-                                               id="username"
-                                               name="username"
-                                               autocomplete="username"
-                                               placeholder="Enter your username">
+                            <div th:if="${param.error != null}"
 
-                                        <p style="color: #828282;">
-                                            Enter your username here.
-                                        </p>
+                                 class="alert alert-danger"
 
-                                    </div>
+                                 role="alert">
 
-                                    <!-- PASSWORD -->
-                                    <div class="mb-3">
 
-                                        <label for="password">
-                                            * Password:
-                                        </label>
 
-                                        <input required
-                                               type="password"
-                                               class="form-control"
-                                               id="password"
-                                               name="password"
-                                               autocomplete="current-password"
-                                               placeholder="Enter your password">
+                                Incorrect username or password.
 
-                                        <p style="color: #828282;">
-                                            Enter the password that
-                                            accompanies your username.
-                                        </p>
 
-                                    </div>
-
-                                    <!-- LOGIN BUTTON -->
-                                    <button type="submit"
-                                            class="btn btn-primary">
-
-                                        Log in
-
-                                    </button>
-
-                                </form>
 
                             </div>
+
+
+
+                            <!-- PASSWORD RESET SUCCESS -->
+
+                            <div th:if="${param.passwordReset != null}"
+
+                                 class="alert alert-success"
+
+                                 role="status">
+
+
+
+                                Your password has been updated.
+
+                                You can now log in.
+
+
+
+                            </div>
+
+
+
+                            <!-- LOGOUT MESSAGE -->
+
+                            <div th:if="${param.logout != null}"
+
+                                 class="alert alert-info"
+
+                                 role="status">
+
+
+
+                                You have been logged out successfully.
+
+
+
+                            </div>
+
+
+
+                            <form th:action="@{/login}"
+
+                                  method="post">
+
+
+
+                                <!-- CSRF -->
+
+                                <input type="hidden"
+
+                                       th:if="${_csrf != null}"
+
+                                       th:name="${_csrf.parameterName}"
+
+                                       th:value="${_csrf.token}">
+
+
+
+                                <!-- USERNAME -->
+
+                                <div class="mb-3">
+
+
+
+                                    <label for="loginUsername"
+
+                                           class="form-label">
+
+                                        Username
+
+                                        <span class="text-danger">*</span>
+
+                                    </label>
+
+
+
+                                    <input type="text"
+
+                                           class="form-control"
+
+                                           id="loginUsername"
+
+                                           name="username"
+
+                                           autocomplete="username"
+
+                                           placeholder="Enter your username"
+
+                                           required>
+
+
+
+                                </div>
+
+
+
+                                <!-- PASSWORD -->
+
+                                <div class="mb-3">
+
+
+
+                                    <label for="loginPassword"
+
+                                           class="form-label">
+
+                                        Password
+
+                                        <span class="text-danger">*</span>
+
+                                    </label>
+
+
+
+                                    <input type="password"
+
+                                           class="form-control"
+
+                                           id="loginPassword"
+
+                                           name="password"
+
+                                           autocomplete="current-password"
+
+                                           placeholder="Enter your password"
+
+                                           required>
+
+
+
+                                </div>
+
+
+
+                                <!-- LOGIN BUTTON -->
+
+                                <button type="submit"
+
+                                        class="btn btn-primary">
+
+
+
+                                    <i class="bi bi-box-arrow-in-right"></i>
+
+                                    Log In
+
+
+
+                                </button>
+
+
+
+                                <button type="button"
+
+                                        class="btn btn-link"
+
+                                        onclick="document.getElementById('forgot-tab').click()">
+
+
+
+                                    Forgot your password?
+
+
+
+                                </button>
+
+
+
+                            </form>
+
+                            <!-- Alternative OpenID Connect sign-in -->
+                            <div class="text-center mt-4">
+                                <div class="text-muted mb-3">Or continue with</div>
+                                <a th:href="@{/oauth2/authorization/keycloak}"
+                                   class="btn btn-outline-primary">
+                                    <i class="bi bi-shield-lock"></i>
+                                    Sign in with Keycloak
+                                </a>
+                            </div>
+
+
+
                         </div>
+
                     </div>
+
+
+
                 </div>
 
+
+
                 <!-- ================================= -->
+
                 <!-- FORGOT PASSWORD -->
+
                 <!-- ================================= -->
 
+
+
                 <div class="tab-pane fade"
-                     id="tab-3"
+
+                     th:classappend="${classActiveForgetPassword == true} ? 'show active' : ''"
+
+                     id="forgot"
+
                      role="tabpanel"
-                     th:classappend="${classActiveForgetPassword == true} ? 'show active' : ''">
 
-                    <div class="panel-group">
-                        <div class="panel panel-default"
-                             style="border: none;">
+                     aria-labelledby="forgot-tab">
 
-                            <div class="panel-body"
-                                 style="background-color: #ededed;
-                                        margin-top: 20px;
-                                        padding: 20px;">
 
-                                <!-- RESET EMAIL CONFIRMATION -->
-                                <div th:if="${forgetPasswordEmailSent == true}"
-                                     class="alert alert-success">
 
-                                    If an account exists with that
-                                    email address, a password-reset
-                                    link has been sent.
-                                    Please check your inbox.
+                    <div class="card shadow-sm">
+
+
+
+                        <div class="card-header bg-light">
+
+                            <h5 class="mb-0">Reset Your Password</h5>
+
+                        </div>
+
+
+
+                        <div class="card-body">
+
+
+
+                            <!-- GENERIC CONFIRMATION -->
+
+                            <div th:if="${forgetPasswordEmailSent == true}"
+
+                                 class="alert alert-success"
+
+                                 role="status">
+
+
+
+                                If an account exists with that email
+
+                                address, a password-reset link has been sent.
+
+
+
+                                Please check your inbox.
+
+
+
+                            </div>
+
+
+
+                            <p class="text-muted">
+
+                                Enter your registered email address.
+
+                                If an account exists, we will send you
+
+                                a secure password-reset link.
+
+                            </p>
+
+
+
+                            <form th:action="@{/forgetPassword}"
+
+                                  method="post">
+
+
+
+                                <!-- CSRF -->
+
+                                <input type="hidden"
+
+                                       th:if="${_csrf != null}"
+
+                                       th:name="${_csrf.parameterName}"
+
+                                       th:value="${_csrf.token}">
+
+
+
+                                <!-- EMAIL -->
+
+                                <div class="mb-3">
+
+
+
+                                    <label for="recoverEmail"
+
+                                           class="form-label">
+
+                                        Email Address
+
+                                        <span class="text-danger">*</span>
+
+                                    </label>
+
+
+
+                                    <input type="email"
+
+                                           class="form-control"
+
+                                           id="recoverEmail"
+
+                                           name="email"
+
+                                           autocomplete="email"
+
+                                           placeholder="Enter your email address"
+
+                                           maxlength="254"
+
+                                           required>
+
+
 
                                 </div>
 
-                                <form th:action="@{/forgetPassword}"
-                                      method="post">
 
-                                    <!-- CSRF TOKEN -->
-                                    <input type="hidden"
-                                           th:if="${_csrf != null}"
-                                           th:name="${_csrf.parameterName}"
-                                           th:value="${_csrf.token}">
 
-                                    <!-- EMAIL -->
-                                    <div class="mb-3">
+                                <!-- RESET BUTTON -->
 
-                                        <label for="recoverEmail">
-                                            * Your Email:
-                                        </label>
+                                <button type="submit"
 
-                                        <input required
-                                               type="email"
-                                               class="form-control"
-                                               id="recoverEmail"
-                                               name="email"
-                                               autocomplete="email">
+                                        class="btn btn-primary">
 
-                                        <p style="color: #828282;">
-                                            Enter your registered email
-                                            address. If an account exists,
-                                            we will email a secure
-                                            password-reset link.
-                                        </p>
 
-                                    </div>
 
-                                    <!-- RESET BUTTON -->
-                                    <button type="submit"
-                                            class="btn btn-primary">
+                                    <i class="bi bi-envelope"></i>
 
-                                        Send Reset Link
+                                    Send Reset Link
 
-                                    </button>
 
-                                </form>
 
-                            </div>
+                                </button>
+
+
+
+                            </form>
+
+
+
                         </div>
+
                     </div>
+
+
+
                 </div>
+
+
 
             </div>
+
             <!-- END TAB CONTENT -->
 
+
+
         </div>
+
     </div>
 
-</div>
+
+
+</main>
+
+
 
 <!-- FOOTER SCRIPTS -->
+
 <div th:replace="~{common/header :: body-bottom-scripts}"></div>
 
+
+
 </body>
+
 </html>

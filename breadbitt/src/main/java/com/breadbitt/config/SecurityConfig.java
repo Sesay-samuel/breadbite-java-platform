@@ -21,6 +21,10 @@ public class SecurityConfig {
     @Autowired
     private UserSecurityService userSecurityService;
 
+    // Validate Keycloak identity mapping after OIDC authentication.
+    @Autowired
+    private KeycloakLoginSuccessHandler keycloakLoginSuccessHandler;
+
     private BCryptPasswordEncoder passwordEncoder() {
         return SecurityUtility.passwordEncoder();
     }
@@ -47,7 +51,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
 
-                        // Public account and password-reset endpoints
+                        // Public registration and password-reset endpoints
                         .requestMatchers(
                                 HttpMethod.GET,
                                 "/newUser",
@@ -61,21 +65,36 @@ public class SecurityConfig {
                                 "/resetPassword")
                         .permitAll()
 
+                        // Spring Security OAuth2 authorization endpoints
+                        .requestMatchers(
+                                "/oauth2/authorization/**",
+                                "/login/oauth2/code/**")
+                        .permitAll()
+
                         // Public pages and static resources
-                        .requestMatchers(PUBLIC_MATCHERS).permitAll()
+                        .requestMatchers(PUBLIC_MATCHERS)
+                        .permitAll()
 
-                        // All other endpoints require login
-                        .anyRequest().authenticated())
+                        // All other endpoints require authentication
+                        .anyRequest()
+                        .authenticated())
 
-                // CSRF protection remains enabled.
+                // Keep CSRF protection enabled
                 .csrf(csrf -> {
                 })
 
+                // Existing Breadbite username/password login
                 .formLogin(form -> form
                         .loginPage("/login")
                         .defaultSuccessUrl("/", true)
                         .permitAll())
 
+                // Keycloak OpenID Connect login with identity mapping check
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login")
+                        .successHandler(keycloakLoginSuccessHandler))
+
+                // Existing logout behavior
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/?logout")
@@ -84,6 +103,7 @@ public class SecurityConfig {
                         .deleteCookies("JSESSIONID", "remember-me")
                         .permitAll())
 
+                // Existing remember-me functionality
                 .rememberMe(rememberMe -> rememberMe
                         .userDetailsService(userSecurityService)
                         .tokenValiditySeconds(86400));
