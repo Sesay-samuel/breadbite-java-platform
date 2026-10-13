@@ -65,7 +65,7 @@
         </dependency>
 
         <!-- ================================================== -->
-        <!-- Database / Persistence                             -->
+        <!-- PostgreSQL / Persistence                           -->
         <!-- ================================================== -->
 
         <dependency>
@@ -85,11 +85,38 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- H2 remains available for automated tests -->
+        <!-- H2 database for automated tests -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
+        </dependency>
+
+        <!-- ================================================== -->
+        <!-- Apache Cassandra - Order Event History             -->
+        <!-- ================================================== -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-cassandra</artifactId>
+        </dependency>
+
+        <!-- ================================================== -->
+        <!-- Apache Kafka - Event-Driven Messaging              -->
+        <!-- ================================================== -->
+
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+
+        <!-- ================================================== -->
+        <!-- OAuth2 / OpenID Connect - Keycloak                 -->
+        <!-- ================================================== -->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
 
         <!-- ================================================== -->
@@ -136,22 +163,11 @@
             <scope>test</scope>
         </dependency>
 
-
-                                                  <!-- Apache Kafka event-driven messaging -->
-         <dependency>
-           <groupId>org.springframework.kafka</groupId>
-           <artifactId>spring-kafka</artifactId>
-        </dependency>
-
-                          <!-- OAuth2 / OpenID Connect authentication -->
-        <dependency>
-          <groupId>org.springframework.boot</groupId>
-          <artifactId>spring-boot-starter-oauth2-client</artifactId>
-        </dependency>
-
     </dependencies>
 
-                                   
+    <!-- ====================================================== -->
+    <!-- Maven Build                                            -->
+    <!-- ====================================================== -->
 
     <build>
         <plugins>
