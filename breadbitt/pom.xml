@@ -136,7 +136,22 @@
             <scope>test</scope>
         </dependency>
 
+
+                                                  <!-- Apache Kafka event-driven messaging -->
+         <dependency>
+           <groupId>org.springframework.kafka</groupId>
+           <artifactId>spring-kafka</artifactId>
+        </dependency>
+
+                          <!-- OAuth2 / OpenID Connect authentication -->
+        <dependency>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-starter-oauth2-client</artifactId>
+        </dependency>
+
     </dependencies>
+
+                                   
 
     <build>
         <plugins>

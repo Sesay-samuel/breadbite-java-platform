@@ -1,115 +1,212 @@
+
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="common/header :: common-header" />
+
+<head th:replace="~{common/header :: common-header}"></head>
 
 <body>
-    <div th:replace="common/header :: navbar" />
 
-    <div class="container">
-        <div class="row">
-            <form class="form-horizontal" th:action="@{/bread/updateBread}" method="post" enctype="multipart/form-data">
-                <fieldset>
-                    <legend class="center-block">Update Bread Information<span style="font-size: small"> * is a required field</span></legend>
-                    
-                    <input hidden="hidden" name="id" th:value="${bread.id}" />
+    <!-- Admin Navigation -->
+    <div th:replace="~{common/header :: navbar}"></div>
 
+    <div class="container py-4">
 
-                    <!-- title -->
-                    <div class="form-group">
-                        <label class="col-md-2 control-label" for="title">* Title</label>
+        <h3 class="mb-4">Update Bread Information</h3>
 
-                        <div class="col-md-8">
-                            <input type="text" name="title" class="form-control" id="title"
-                                th:value="${bread.title}" required="required" placeholder="Title" />
-                            <span class="help-block">Title of the bread</span>
-                        </div>
-                    </div>
+        <form
+            class="form-horizontal"
+            th:action="@{/home/bread/updateBread}"
+            method="post"
+            enctype="multipart/form-data">
 
-                    <!-- category -->
-                    <div class="form-group">
-                        <label class="col-md-2 control-label" for="category">* Category</label>
-                        <div class="col-md-8">
-                            <input type="text" name="category" class="form-control" id="category"
-                                th:value="${bread.category}" required="required" placeholder="Category" />
-                            <span class="help-block">Category of the bread</span>
-                        </div>
-                    </div>
+            <!-- CSRF Protection -->
+            <input
+                type="hidden"
+                th:name="${_csrf.parameterName}"
+                th:value="${_csrf.token}"
+            />
 
-                    <!-- list price -->
-                    <div class="form-group">
-                        <label class="col-md-2 control-label" for="listPrice">* List Price</label>
-                        <div class="col-md-8">
-                            <input type="number" name="listPrice" class="form-control" id="listPrice"
-                                th:value="${bread.listPrice}" required="required" placeholder="List Price" />
-                            <span class="help-block">List price of the bread</span>
-                        </div>
-                    </div>
+            <!-- Bread ID -->
+            <input
+                type="hidden"
+                name="id"
+                th:value="${bread.id}"
+            />
 
-                    <!-- our price -->
-                    <div class="form-group">
-                        <label class="col-md-2 control-label" for="ourPrice">* Our Price</label>
-                        <div class="col-md-8">
-                            <input type="number" name="ourPrice" class="form-control" id="ourPrice"
-                                th:value="${bread.ourPrice}" required="required" placeholder="Our Price" />
-                            <span class="help-block">Our price of the bread</span>
-                        </div>
-                    </div>
+            <fieldset>
 
-                    <!-- in stock number -->
-                    <div class="form-group">
-                        <label class="col-md-2 control-label" for="inStockNumber">Number in stock</label>
-                        <div class="col-md-8">
-                            <input type="number" name="inStockNumber" class="form-control" id="inStockNumber"
-                                th:value="${bread.inStockNumber}" placeholder="Number of in-stock copies" />
-                            <span class="help-block">Number of in-stock copies</span>
-                        </div>
-                    </div>
+                <legend>
+                    Edit Bread Details
+                    <small class="text-muted">
+                        (* Required fields)
+                    </small>
+                </legend>
 
-                    <!-- active -->
-                    <div class="form-group">
-                        <label class="col-md-2 control-label" for="active">* Active</label>
-                        <div class="col-md-8">
-                            <select name="active" class="form-control" id="active" required="required">
-                                <option value="true" th:selected="${bread.active} == true">Yes</option>
-                                <option value="false" th:selected="${bread.active} == false">No</option>
-                            </select>
-                            <span class="help-block">Whether the bread is active or not</span>
-                        </div>
-                    </div>
+                <!-- Bread Title -->
+                <div class="mb-3">
+                    <label for="title" class="form-label">
+                        * Bread Title
+                    </label>
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        class="form-control"
+                        th:value="${bread.title}"
+                        required
+                    />
+                </div>
 
-                    <!-- description -->
-                    <div class="form-group">
-                        <label class="col-md-2 control-label" for="description">Description</label>
-                        <div class="col-md-8">
-                            <textarea name="description" rows="5" class="form-control" id="description"
-                                th:text="${bread.description}" placeholder="Description"></textarea>
-                            <span class="help-block">Description of the bread</span>
-                        </div>
-                    </div>
+                <!-- Category -->
+                <div class="mb-3">
+                    <label for="category" class="form-label">
+                        * Category
+                    </label>
+                    <input
+                        type="text"
+                        id="category"
+                        name="category"
+                        class="form-control"
+                        th:value="${bread.category}"
+                        required
+                    />
+                </div>
 
-                    <!-- upload image -->
-                    <div class="form-group">
-                        <div class="col-md-2">
-                            <label for="breadImage">Upload bread image</label>
-                        </div>
-                        <div class="col-md-8">
-                            <input id="breadImage" type="file" name="breadImage" />
-                        </div>
-                    </div>
+                <!-- List Price -->
+                <div class="mb-3">
+                    <label for="listPrice" class="form-label">
+                        * List Price
+                    </label>
+                    <input
+                        type="number"
+                        id="listPrice"
+                        name="listPrice"
+                        class="form-control"
+                        th:value="${bread.listPrice}"
+                        min="0"
+                        step="0.01"
+                        required
+                    />
+                </div>
 
-                    <!-- submit button -->
-                    <div class="form-group">
-                        <div class="col-md-2"></div>
-                        <div class="col-md-8">
-                            <button type="submit" class="btn btn-success">Update Bread</button>
-                            <a class="btn btn-danger" th:href="@{/bread/breadInfo(id=${bread.id})}">Cancel</a>
-                        </div>
-                    </div>
-                </fieldset>
-            </form>
-        </div>
+                <!-- Our Price -->
+                <div class="mb-3">
+                    <label for="ourPrice" class="form-label">
+                        * Our Price
+                    </label>
+                    <input
+                        type="number"
+                        id="ourPrice"
+                        name="ourPrice"
+                        class="form-control"
+                        th:value="${bread.ourPrice}"
+                        min="0"
+                        step="0.01"
+                        required
+                    />
+                </div>
+
+                <!-- Number in Stock -->
+                <div class="mb-3">
+                    <label for="inStockNumber" class="form-label">
+                        Number in Stock
+                    </label>
+                    <input
+                        type="number"
+                        id="inStockNumber"
+                        name="inStockNumber"
+                        class="form-control"
+                        th:value="${bread.inStockNumber}"
+                        min="0"
+                    />
+                </div>
+
+                <!-- Active Status -->
+                <div class="mb-3">
+                    <label for="active" class="form-label">
+                        * Active
+                    </label>
+
+                    <select
+                        id="active"
+                        name="active"
+                        class="form-select"
+                        required>
+
+                        <option
+                            value="true"
+                            th:selected="${bread.active == true}">
+                            Yes
+                        </option>
+
+                        <option
+                            value="false"
+                            th:selected="${bread.active == false}">
+                            No
+                        </option>
+
+                    </select>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-3">
+                    <label for="description" class="form-label">
+                        Description
+                    </label>
+
+                    <textarea
+                        id="description"
+                        name="description"
+                        rows="5"
+                        class="form-control"
+                        th:text="${bread.description}">
+                    </textarea>
+                </div>
+
+                <!-- Bread Image -->
+                <div class="mb-4">
+                    <label for="breadImage" class="form-label">
+                        Upload New Bread Image
+                    </label>
+
+                    <input
+                        type="file"
+                        id="breadImage"
+                        name="breadImage"
+                        class="form-control"
+                        accept="image/*"
+                    />
+
+                    <small class="text-muted">
+                        Leave this empty to keep the existing image.
+                    </small>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex gap-2">
+
+                    <button
+                        type="submit"
+                        class="btn btn-success">
+                        Update Bread
+                    </button>
+
+                    <a
+                        th:href="@{/home/bread/breadInfo(id=${bread.id})}"
+                        class="btn btn-danger">
+                        Cancel
+                    </a>
+
+                </div>
+
+            </fieldset>
+
+        </form>
+
     </div>
 
-    <div th:replace="common/header :: body-bottom-scripts" />
+    <!-- Common JavaScript -->
+    <div th:replace="~{common/header :: body-bottom-scripts}"></div>
+
 </body>
 </html>

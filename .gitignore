@@ -7,3 +7,25 @@
 
 # IDE / generated binary output
 **/bin/
+
+# Application error logs
+*.log
+logs/
+**/logs/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# IDE settings
+.idea/
+.vscode/
+*.iml
+
+# Operating system files
+.DS_Store
+Thumbs.db
