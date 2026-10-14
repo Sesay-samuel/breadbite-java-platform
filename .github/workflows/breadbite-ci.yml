@@ -79,14 +79,12 @@ jobs:
         working-directory: .
         shell: bash
         run: |
+          echo "Creating Breadbite Cassandra keyspace..."
+
           docker exec "${{ job.services.cassandra.id }}" \
-            cqlsh -e "
-              CREATE KEYSPACE IF NOT EXISTS breadbite_events
-              WITH replication = {
-                'class': 'SimpleStrategy',
-                'replication_factor': 1
-              };
-            "
+            cqlsh -e "CREATE KEYSPACE IF NOT EXISTS breadbite_events WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};"
+
+          echo "Cassandra keyspace initialized."
 
       - name: Build and run tests
         run: mvn -B clean verify
