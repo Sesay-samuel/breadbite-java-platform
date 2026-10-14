@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
@@ -23,23 +21,18 @@
 
     <properties>
         <java.version>21</java.version>
+        <kotlin.version>1.9.25</kotlin.version>
     </properties>
 
     <dependencies>
 
-        <!-- ================================================== -->
-        <!-- Web / MVC                                          -->
-        <!-- ================================================== -->
-
+        <!-- Web / MVC -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- ================================================== -->
-        <!-- Thymeleaf                                          -->
-        <!-- ================================================== -->
-
+        <!-- Thymeleaf -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-thymeleaf</artifactId>
@@ -50,10 +43,7 @@
             <artifactId>thymeleaf-extras-springsecurity6</artifactId>
         </dependency>
 
-        <!-- ================================================== -->
-        <!-- Security                                           -->
-        <!-- ================================================== -->
-
+        <!-- Spring Security -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -64,10 +54,7 @@
             <artifactId>spring-security-web</artifactId>
         </dependency>
 
-        <!-- ================================================== -->
-        <!-- PostgreSQL / Persistence                           -->
-        <!-- ================================================== -->
-
+        <!-- PostgreSQL / Persistence -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
@@ -92,37 +79,25 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- ================================================== -->
-        <!-- Apache Cassandra - Order Event History             -->
-        <!-- ================================================== -->
-
+        <!-- Apache Cassandra -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-cassandra</artifactId>
         </dependency>
 
-        <!-- ================================================== -->
-        <!-- Apache Kafka - Event-Driven Messaging              -->
-        <!-- ================================================== -->
-
+        <!-- Apache Kafka -->
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
 
-        <!-- ================================================== -->
-        <!-- OAuth2 / OpenID Connect - Keycloak                 -->
-        <!-- ================================================== -->
-
+        <!-- OAuth2 / Keycloak -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-oauth2-client</artifactId>
         </dependency>
 
-        <!-- ================================================== -->
-        <!-- Mail                                               -->
-        <!-- ================================================== -->
-
+        <!-- Email / SMTP -->
         <dependency>
             <groupId>com.sun.mail</groupId>
             <artifactId>jakarta.mail</artifactId>
@@ -134,29 +109,32 @@
             <artifactId>spring-context-support</artifactId>
         </dependency>
 
-        <!-- ================================================== -->
-        <!-- Web Services                                       -->
-        <!-- ================================================== -->
-
+        <!-- Web Services -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web-services</artifactId>
         </dependency>
 
-        <!-- ================================================== -->
-        <!-- Development                                        -->
-        <!-- ================================================== -->
-
+        <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- ================================================== -->
-        <!-- Testing                                            -->
-        <!-- ================================================== -->
+        <!-- Kotlin JVM support -->
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+        </dependency>
 
+        <!-- Kotlin reflection -->
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-reflect</artifactId>
+        </dependency>
+
+        <!-- Testing -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -165,13 +143,41 @@
 
     </dependencies>
 
-    <!-- ====================================================== -->
-    <!-- Maven Build                                            -->
-    <!-- ====================================================== -->
-
+    <!-- Maven Build Configuration -->
     <build>
         <plugins>
 
+            <!-- Kotlin compiler -->
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <version>${kotlin.version}</version>
+
+                <extensions>true</extensions>
+
+                <configuration>
+                    <jvmTarget>21</jvmTarget>
+
+                    <sourceDirs>
+                        <sourceDir>${project.basedir}/src/main/kotlin</sourceDir>
+                        <sourceDir>${project.basedir}/src/main/java</sourceDir>
+                    </sourceDirs>
+
+                    <compilerPlugins>
+                        <plugin>spring</plugin>
+                    </compilerPlugins>
+                </configuration>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-allopen</artifactId>
+                        <version>${kotlin.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <!-- Spring Boot Maven plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
