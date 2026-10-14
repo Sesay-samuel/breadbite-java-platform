@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - feature/azure-cicd
+
   pull_request:
     branches:
       - main
@@ -85,6 +86,28 @@ jobs:
             cqlsh -e "CREATE KEYSPACE IF NOT EXISTS breadbite_events WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};"
 
           echo "Cassandra keyspace initialized."
+
+      - name: Initialize Cassandra order history table
+        working-directory: .
+        shell: bash
+        run: |
+          echo "Creating Cassandra order history table..."
+
+          docker exec "${{ job.services.cassandra.id }}" \
+            cqlsh -e "CREATE TABLE IF NOT EXISTS breadbite_events.order_event_history (
+              order_id text,
+              event_time timestamp,
+              event_id uuid,
+              event_type text,
+              event_status text,
+              event_details text,
+              PRIMARY KEY (order_id, event_time, event_id)
+            ) WITH CLUSTERING ORDER BY (
+              event_time DESC,
+              event_id ASC
+            );"
+
+          echo "Cassandra order history table initialized."
 
       - name: Build and run tests
         run: mvn -B clean verify
