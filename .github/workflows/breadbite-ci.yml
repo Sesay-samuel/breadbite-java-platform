@@ -121,7 +121,7 @@ jobs:
           EOF
 
       - name: Build and run tests
-        run: mvn -B clean verify
+        run: mvn -B  verify
         env:
           SPRING_PROFILES_ACTIVE: ci
 
