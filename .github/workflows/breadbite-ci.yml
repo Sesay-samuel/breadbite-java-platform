@@ -1,0 +1,207 @@
+
+name: Breadbite Java CI
+
+on:
+  push:
+    branches:
+      - main
+      - feature/azure-cicd
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    name: Build and Test Spring Boot
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: breadbite
+          POSTGRES_USER: breadbite_ci
+          POSTGRES_PASSWORD: breadbite_ci_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U breadbite_ci -d breadbite"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      cassandra:
+        image: cassandra:4.1
+        env:
+          CASSANDRA_CLUSTER_NAME: BreadbiteCI
+          CASSANDRA_DC: datacenter1
+        ports:
+          - 9042:9042
+
+    defaults:
+      run:
+        working-directory: breadbitt
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: breadbitt/pom.xml
+
+      - name: Wait for Cassandra
+        working-directory: .
+        shell: bash
+        run: |
+          echo "Waiting for Cassandra to become ready..."
+
+          for i in {1..60}; do
+            if docker exec "${{ job.services.cassandra.id }}" \
+              cqlsh -e "DESCRIBE KEYSPACES" >/dev/null 2>&1; then
+              echo "Cassandra is ready."
+              exit 0
+            fi
+
+            echo "Cassandra not ready ($i/60)"
+            sleep 5
+          done
+
+          echo "Cassandra failed to become ready."
+          exit 1
+
+      - name: Initialize Cassandra keyspace
+        working-directory: .
+        shell: bash
+        run: |
+          docker exec "${{ job.services.cassandra.id }}" \
+            cqlsh -e "CREATE KEYSPACE IF NOT EXISTS breadbite_events WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};"
+
+      - name: Initialize Cassandra order history table
+        working-directory: .
+        shell: bash
+        run: |
+          docker exec "${{ job.services.cassandra.id }}" \
+            cqlsh -e "CREATE TABLE IF NOT EXISTS breadbite_events.order_event_history (
+              order_id text,
+              event_time timestamp,
+              event_id uuid,
+              event_type text,
+              event_status text,
+              event_details text,
+              PRIMARY KEY (order_id, event_time, event_id)
+            ) WITH CLUSTERING ORDER BY (
+              event_time DESC,
+              event_id ASC
+            );"
+
+      - name: Prepare CI-only Spring configuration
+        shell: bash
+        run: |
+          mkdir -p target/ci-config
+
+          cat > target/ci-config/application.properties <<'EOF'
+          # ==========================================================
+          # Breadbite CI - Keycloak OAuth2 Configuration
+          # ==========================================================
+
+          spring.security.oauth2.client.registration.keycloak.client-id=breadbite-web
+          spring.security.oauth2.client.registration.keycloak.client-secret=ci-test-only-secret
+          spring.security.oauth2.client.registration.keycloak.authorization-grant-type=authorization_code
+          spring.security.oauth2.client.registration.keycloak.scope=openid,profile,email
+          spring.security.oauth2.client.registration.keycloak.redirect-uri={baseUrl}/login/oauth2/code/{registrationId}
+
+          spring.security.oauth2.client.provider.keycloak.authorization-uri=http://localhost:8180/realms/breadbite/protocol/openid-connect/auth
+          spring.security.oauth2.client.provider.keycloak.token-uri=http://localhost:8180/realms/breadbite/protocol/openid-connect/token
+          spring.security.oauth2.client.provider.keycloak.user-info-uri=http://localhost:8180/realms/breadbite/protocol/openid-connect/userinfo
+          spring.security.oauth2.client.provider.keycloak.jwk-set-uri=http://localhost:8180/realms/breadbite/protocol/openid-connect/certs
+          spring.security.oauth2.client.provider.keycloak.user-name-attribute=sub
+
+          # ==========================================================
+          # Breadbite CI - Email / SMTP Configuration
+          # ==========================================================
+
+          spring.mail.host=smtp.gmail.com
+          spring.mail.port=587
+          spring.mail.username=ci@example.invalid
+          spring.mail.password=ci-test-only-password
+          spring.mail.properties.mail.smtp.auth=true
+          spring.mail.properties.mail.smtp.starttls.enable=true
+          spring.mail.properties.mail.smtp.starttls.required=true
+
+          support.email=support@example.invalid
+          app.base-url=http://localhost:8098
+
+          # ==========================================================
+          # Breadbite CI - Database Configuration
+          # ==========================================================
+
+          spring.datasource.url=${DB_URL}
+          spring.datasource.username=${DB_USERNAME}
+          spring.datasource.password=${DB_PASSWORD}
+
+          spring.jpa.hibernate.ddl-auto=update
+          spring.jpa.open-in-view=false
+
+          # ==========================================================
+          # Breadbite CI - Cassandra Configuration
+          # ==========================================================
+
+          spring.cassandra.contact-points=${CASSANDRA_HOST:localhost}
+          spring.cassandra.port=${CASSANDRA_PORT:9042}
+          spring.cassandra.local-datacenter=${CASSANDRA_DATACENTER:datacenter1}
+          spring.cassandra.keyspace-name=${CASSANDRA_KEYSPACE:breadbite_events}
+          spring.cassandra.schema-action=NONE
+
+          # ==========================================================
+          # Breadbite CI - Kafka Configuration
+          # ==========================================================
+
+          spring.kafka.bootstrap-servers=${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+          breadbite.kafka.order-topic=breadbite.orders.placed
+          breadbite.kafka.cassandra-group=breadbite-cassandra-history
+
+          spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+          spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+
+          spring.kafka.consumer.group-id=breadbite-order-notifications
+          spring.kafka.consumer.auto-offset-reset=earliest
+          spring.kafka.consumer.enable-auto-commit=false
+
+          spring.kafka.consumer.key-deserializer=org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+          spring.kafka.consumer.value-deserializer=org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+          spring.kafka.consumer.properties[spring.deserializer.key.delegate.class]=org.apache.kafka.common.serialization.StringDeserializer
+          spring.kafka.consumer.properties[spring.deserializer.value.delegate.class]=org.springframework.kafka.support.serializer.JsonDeserializer
+
+          spring.kafka.consumer.properties[spring.json.trusted.packages]=com.breadbitt.events
+          spring.kafka.consumer.properties[spring.json.value.default.type]=com.breadbitt.events.OrderPlacedEvent
+          spring.kafka.consumer.properties[spring.json.use.type.headers]=false
+          EOF
+
+      - name: Build and run tests
+        run: mvn -B verify
+        env:
+          SPRING_PROFILES_ACTIVE: ci
+          SPRING_CONFIG_LOCATION: file:./target/ci-config/application.properties
+
+          DB_URL: jdbc:postgresql://localhost:5432/breadbite
+          DB_USERNAME: breadbite_ci
+          DB_PASSWORD: breadbite_ci_password
+
+          CASSANDRA_HOST: localhost
+          CASSANDRA_PORT: '9042'
+          CASSANDRA_DATACENTER: datacenter1
+          CASSANDRA_KEYSPACE: breadbite_events
+
+          KAFKA_BOOTSTRAP_SERVERS: localhost:9092
+          KEYCLOAK_CLIENT_SECRET: ci-test-only-secret
+
+          MAIL_USERNAME: ci@example.invalid
+          MAIL_PASSWORD: ci-test-only-password
+          SUPPORT_EMAIL: support@example.invalid
