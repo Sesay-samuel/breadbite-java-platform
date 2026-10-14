@@ -107,6 +107,10 @@ jobs:
           mkdir -p target/ci-config
 
           cat > target/ci-config/application.properties <<'EOF'
+          # ==========================================================
+          # Breadbite CI - Keycloak OAuth2 Configuration
+          # ==========================================================
+
           spring.security.oauth2.client.registration.keycloak.client-id=breadbite-web
           spring.security.oauth2.client.registration.keycloak.client-secret=ci-test-only-secret
           spring.security.oauth2.client.registration.keycloak.authorization-grant-type=authorization_code
@@ -118,13 +122,72 @@ jobs:
           spring.security.oauth2.client.provider.keycloak.user-info-uri=http://localhost:8180/realms/breadbite/protocol/openid-connect/userinfo
           spring.security.oauth2.client.provider.keycloak.jwk-set-uri=http://localhost:8180/realms/breadbite/protocol/openid-connect/certs
           spring.security.oauth2.client.provider.keycloak.user-name-attribute=sub
+
+          # ==========================================================
+          # Breadbite CI - Email / SMTP Configuration
+          # ==========================================================
+
+          spring.mail.host=smtp.gmail.com
+          spring.mail.port=587
+          spring.mail.username=ci@example.invalid
+          spring.mail.password=ci-test-only-password
+          spring.mail.properties.mail.smtp.auth=true
+          spring.mail.properties.mail.smtp.starttls.enable=true
+          spring.mail.properties.mail.smtp.starttls.required=true
+
+          support.email=support@example.invalid
+          app.base-url=http://localhost:8098
+
+          # ==========================================================
+          # Breadbite CI - Database Configuration
+          # ==========================================================
+
+          spring.datasource.url=${DB_URL}
+          spring.datasource.username=${DB_USERNAME}
+          spring.datasource.password=${DB_PASSWORD}
+
+          spring.jpa.hibernate.ddl-auto=update
+          spring.jpa.open-in-view=false
+
+          # ==========================================================
+          # Breadbite CI - Cassandra Configuration
+          # ==========================================================
+
+          spring.cassandra.contact-points=${CASSANDRA_HOST:localhost}
+          spring.cassandra.port=${CASSANDRA_PORT:9042}
+          spring.cassandra.local-datacenter=${CASSANDRA_DATACENTER:datacenter1}
+          spring.cassandra.keyspace-name=${CASSANDRA_KEYSPACE:breadbite_events}
+          spring.cassandra.schema-action=NONE
+
+          # ==========================================================
+          # Breadbite CI - Kafka Configuration
+          # ==========================================================
+
+          spring.kafka.bootstrap-servers=${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+          breadbite.kafka.order-topic=breadbite.orders.placed
+          breadbite.kafka.cassandra-group=breadbite-cassandra-history
+
+          spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
+          spring.kafka.producer.value-serializer=org.springframework.kafka.support.serializer.JsonSerializer
+
+          spring.kafka.consumer.group-id=breadbite-order-notifications
+          spring.kafka.consumer.auto-offset-reset=earliest
+          spring.kafka.consumer.enable-auto-commit=false
+
+          spring.kafka.consumer.key-deserializer=org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+          spring.kafka.consumer.value-deserializer=org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+          spring.kafka.consumer.properties[spring.deserializer.key.delegate.class]=org.apache.kafka.common.serialization.StringDeserializer
+          spring.kafka.consumer.properties[spring.deserializer.value.delegate.class]=org.springframework.kafka.support.serializer.JsonDeserializer
+
+          spring.kafka.consumer.properties[spring.json.trusted.packages]=com.breadbitt.events
+          spring.kafka.consumer.properties[spring.json.value.default.type]=com.breadbitt.events.OrderPlacedEvent
+          spring.kafka.consumer.properties[spring.json.use.type.headers]=false
           EOF
 
       - name: Build and run tests
-        run: mvn -B  verify
+        run: mvn -B verify
         env:
           SPRING_PROFILES_ACTIVE: ci
-
           SPRING_CONFIG_LOCATION: file:./target/ci-config/application.properties
 
           DB_URL: jdbc:postgresql://localhost:5432/breadbite
@@ -137,7 +200,6 @@ jobs:
           CASSANDRA_KEYSPACE: breadbite_events
 
           KAFKA_BOOTSTRAP_SERVERS: localhost:9092
-
           KEYCLOAK_CLIENT_SECRET: ci-test-only-secret
 
           MAIL_USERNAME: ci@example.invalid
