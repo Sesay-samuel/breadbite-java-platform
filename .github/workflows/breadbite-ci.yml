@@ -101,10 +101,31 @@ jobs:
               event_id ASC
             );"
 
+      - name: Prepare CI-only Spring configuration
+        shell: bash
+        run: |
+          mkdir -p target/ci-config
+
+          cat > target/ci-config/application.properties <<'EOF'
+          spring.security.oauth2.client.registration.keycloak.client-id=breadbite-web
+          spring.security.oauth2.client.registration.keycloak.client-secret=ci-test-only-secret
+          spring.security.oauth2.client.registration.keycloak.authorization-grant-type=authorization_code
+          spring.security.oauth2.client.registration.keycloak.scope=openid,profile,email
+          spring.security.oauth2.client.registration.keycloak.redirect-uri={baseUrl}/login/oauth2/code/{registrationId}
+
+          spring.security.oauth2.client.provider.keycloak.authorization-uri=http://localhost:8180/realms/breadbite/protocol/openid-connect/auth
+          spring.security.oauth2.client.provider.keycloak.token-uri=http://localhost:8180/realms/breadbite/protocol/openid-connect/token
+          spring.security.oauth2.client.provider.keycloak.user-info-uri=http://localhost:8180/realms/breadbite/protocol/openid-connect/userinfo
+          spring.security.oauth2.client.provider.keycloak.jwk-set-uri=http://localhost:8180/realms/breadbite/protocol/openid-connect/certs
+          spring.security.oauth2.client.provider.keycloak.user-name-attribute=sub
+          EOF
+
       - name: Build and run tests
         run: mvn -B clean verify
         env:
           SPRING_PROFILES_ACTIVE: ci
+
+          SPRING_CONFIG_LOCATION: file:./target/ci-config/application.properties
 
           DB_URL: jdbc:postgresql://localhost:5432/breadbite
           DB_USERNAME: breadbite_ci
