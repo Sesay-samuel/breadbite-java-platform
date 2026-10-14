@@ -80,19 +80,13 @@ jobs:
         working-directory: .
         shell: bash
         run: |
-          echo "Creating Breadbite Cassandra keyspace..."
-
           docker exec "${{ job.services.cassandra.id }}" \
             cqlsh -e "CREATE KEYSPACE IF NOT EXISTS breadbite_events WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};"
-
-          echo "Cassandra keyspace initialized."
 
       - name: Initialize Cassandra order history table
         working-directory: .
         shell: bash
         run: |
-          echo "Creating Cassandra order history table..."
-
           docker exec "${{ job.services.cassandra.id }}" \
             cqlsh -e "CREATE TABLE IF NOT EXISTS breadbite_events.order_event_history (
               order_id text,
@@ -107,11 +101,11 @@ jobs:
               event_id ASC
             );"
 
-          echo "Cassandra order history table initialized."
-
       - name: Build and run tests
         run: mvn -B clean verify
         env:
+          SPRING_PROFILES_ACTIVE: ci
+
           DB_URL: jdbc:postgresql://localhost:5432/breadbite
           DB_USERNAME: breadbite_ci
           DB_PASSWORD: breadbite_ci_password
@@ -125,13 +119,6 @@ jobs:
 
           KEYCLOAK_CLIENT_SECRET: ci-test-only-secret
 
-          SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI: ""
-          SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_AUTHORIZATION_URI: http://localhost:8180/realms/breadbite/protocol/openid-connect/auth
-          SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN_URI: http://localhost:8180/realms/breadbite/protocol/openid-connect/token
-          SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_USER_INFO_URI: http://localhost:8180/realms/breadbite/protocol/openid-connect/userinfo
-          SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_JWK_SET_URI: http://localhost:8180/realms/breadbite/protocol/openid-connect/certs
-          SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_USER_NAME_ATTRIBUTE: sub
-
-          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
-          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
-          SUPPORT_EMAIL: ${{ secrets.SUPPORT_EMAIL }}
+          MAIL_USERNAME: ci@example.invalid
+          MAIL_PASSWORD: ci-test-only-password
+          SUPPORT_EMAIL: support@example.invalid
