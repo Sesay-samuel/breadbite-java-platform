@@ -14,6 +14,7 @@ jobs:
   build-and-test:
     name: Build and Test Spring Boot
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     services:
       postgres:
@@ -29,6 +30,14 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
+      cassandra:
+        image: cassandra:4.1
+        env:
+          CASSANDRA_CLUSTER_NAME: BreadbiteCI
+          CASSANDRA_DC: datacenter1
+        ports:
+          - 9042:9042
 
     defaults:
       run:
@@ -46,12 +55,51 @@ jobs:
           cache: maven
           cache-dependency-path: breadbitt/pom.xml
 
+      - name: Wait for Cassandra
+        working-directory: .
+        shell: bash
+        run: |
+          echo "Waiting for Cassandra to become ready..."
+
+          for i in {1..60}; do
+            if docker exec "${{ job.services.cassandra.id }}" \
+              cqlsh -e "DESCRIBE KEYSPACES" >/dev/null 2>&1; then
+              echo "Cassandra is ready."
+              exit 0
+            fi
+
+            echo "Cassandra not ready ($i/60)"
+            sleep 5
+          done
+
+          echo "Cassandra failed to become ready."
+          exit 1
+
+      - name: Initialize Cassandra keyspace
+        working-directory: .
+        shell: bash
+        run: |
+          docker exec "${{ job.services.cassandra.id }}" \
+            cqlsh -e "
+              CREATE KEYSPACE IF NOT EXISTS breadbite_events
+              WITH replication = {
+                'class': 'SimpleStrategy',
+                'replication_factor': 1
+              };
+            "
+
       - name: Build and run tests
         run: mvn -B clean verify
         env:
           DB_URL: jdbc:postgresql://localhost:5432/breadbite
           DB_USERNAME: breadbite_ci
           DB_PASSWORD: breadbite_ci_password
+
+          CASSANDRA_HOST: localhost
+          CASSANDRA_PORT: '9042'
+          CASSANDRA_DATACENTER: datacenter1
+          CASSANDRA_KEYSPACE: breadbite_events
+
           KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
