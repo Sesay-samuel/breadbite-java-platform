@@ -1,0 +1,58 @@
+
+name: Breadbite Java CI
+
+on:
+  push:
+    branches:
+      - main
+      - feature/azure-cicd
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    name: Build and Test Spring Boot
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: breadbite
+          POSTGRES_USER: breadbite_ci
+          POSTGRES_PASSWORD: breadbite_ci_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U breadbite_ci -d breadbite"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    defaults:
+      run:
+        working-directory: breadbitt
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: breadbitt/pom.xml
+
+      - name: Build and run tests
+        run: mvn -B clean verify
+        env:
+          DB_URL: jdbc:postgresql://localhost:5432/breadbite
+          DB_USERNAME: breadbite_ci
+          DB_PASSWORD: breadbite_ci_password
+          KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          SUPPORT_EMAIL: ${{ secrets.SUPPORT_EMAIL }}
