@@ -121,7 +121,17 @@ jobs:
           CASSANDRA_DATACENTER: datacenter1
           CASSANDRA_KEYSPACE: breadbite_events
 
-          KEYCLOAK_CLIENT_SECRET: ${{ secrets.KEYCLOAK_CLIENT_SECRET }}
+          KAFKA_BOOTSTRAP_SERVERS: localhost:9092
+
+          KEYCLOAK_CLIENT_SECRET: ci-test-only-secret
+
+          SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER_URI: ""
+          SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_AUTHORIZATION_URI: http://localhost:8180/realms/breadbite/protocol/openid-connect/auth
+          SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN_URI: http://localhost:8180/realms/breadbite/protocol/openid-connect/token
+          SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_USER_INFO_URI: http://localhost:8180/realms/breadbite/protocol/openid-connect/userinfo
+          SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_JWK_SET_URI: http://localhost:8180/realms/breadbite/protocol/openid-connect/certs
+          SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_USER_NAME_ATTRIBUTE: sub
+
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           SUPPORT_EMAIL: ${{ secrets.SUPPORT_EMAIL }}
