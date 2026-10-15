@@ -1,63 +1,245 @@
+
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1000/xhtml">
-<head th:replace="common/header :: common-header"></head>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{common/header :: common-header}">
+    <title>Breadbite - Order Confirmation</title>
+</head>
+
 <body>
-    <div th:replace="common/header :: navbar"></div>
 
-    <div class="container">
-        <div class="row mb-5">
-            <div class="col-8">
-                <h2 class="section-headline">
-                    <span>User Account</span>
-                </h2>
-            </div>
-            <div class="col-4">
-                <img src="/image/logo.png" class="img-fluid" />
-            </div>
+<div th:replace="~{common/header :: navbar}"></div>
+
+<div class="container">
+
+    <!-- Page header -->
+    <div class="row mb-5">
+        <div class="col-8">
+            <h2 class="section-headline">
+                <span>Order Confirmation</span>
+            </h2>
         </div>
-        <hr class="position-absolute w-100" style="height: 6px; background-color: #333; z-index: -1; top: -80px;" />
-        <img class="img-fluid" src="/image/wood.png" style="margin-top: -75px;" />
 
-        <div class="row mt-2">
-            <div class="col-12">
-                <div class="alert alert-success">
-                    <h3>
-                        <i class="fa fa-check" aria-hidden="true" style="color: limegreen;"></i> Thank you, your order has been placed.
-                    </h3>
-                    <h4>
-                        The estimated delivery date is <span th:text="${estimatedDeliveryDate}"></span>
+        <div class="col-4">
+            <img th:src="@{/image/logo.png}"
+                 src="/image/logo.png"
+                 class="img-fluid"
+                 alt="Breadbite Bakery Logo" />
+        </div>
+    </div>
+
+    <!-- Existing bakery background -->
+    <hr class="position-absolute w-100"
+        style="height: 6px;
+               background-color: #333;
+               z-index: -1;
+               top: -80px;" />
+
+    <img class="img-fluid"
+         th:src="@{/image/wood.png}"
+         src="/image/wood.png"
+         alt="Bakery background"
+         style="margin-top: -75px;" />
+
+    <!-- Order confirmation -->
+    <div class="row mt-3">
+        <div class="col-12">
+
+            <div class="alert alert-success">
+
+                <h3>
+                    <i class="fa fa-check-circle"
+                       aria-hidden="true"></i>
+                    Thank you, your order has been placed!
+                </h3>
+
+                <p class="mb-1">
+                    <strong>Order Number:</strong>
+                    <span th:text="${order.id}">252</span>
+                </p>
+
+                <p class="mb-1">
+                    <strong>Order Status:</strong>
+                    <span th:text="${order.orderStatus}">
+                        created
+                    </span>
+                </p>
+
+                <p class="mb-0">
+                    <strong>Estimated Delivery Date:</strong>
+                    <span th:text="${estimatedDeliveryDate}">
+                        2026-10-20
+                    </span>
+                </p>
+
+            </div>
+
+            <!-- Purchased items -->
+            <h3 class="mt-4 mb-3">
+                Your Purchased Items
+            </h3>
+
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-striped align-middle">
+
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Product</th>
+                            <th scope="col">Bread Name</th>
+                            <th scope="col" class="text-center">
+                                Quantity
+                            </th>
+                            <th scope="col" class="text-end">
+                                Unit Price
+                            </th>
+                            <th scope="col" class="text-end">
+                                Subtotal
+                            </th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        <tr th:each="cartItem : ${cartItemList}">
+
+                            <!-- Product image -->
+                            <td>
+                                <a th:href="@{/breadDetail(id=${cartItem.bread.id})}">
+
+                                    <img class="img-fluid shelf-bread"
+                                         th:src="@{'/image/bread/' + ${cartItem.bread.id} + '.png'}"
+                                         alt="Purchased bread"
+                                         style="width: 75px;
+                                                height: 75px;
+                                                object-fit: cover;" />
+
+                                </a>
+                            </td>
+
+                            <!-- Product name -->
+                            <td>
+                                <a th:href="@{/breadDetail(id=${cartItem.bread.id})}"
+                                   th:text="${cartItem.bread.title}">
+                                    Bread Name
+                                </a>
+                            </td>
+
+                            <!-- Quantity -->
+                            <td class="text-center"
+                                th:text="${cartItem.qty}">
+                                1
+                            </td>
+
+                            <!-- Unit price -->
+                            <td class="text-end">
+                                $<span th:text="${cartItem.bread.ourPrice}">
+                                    0.00
+                                </span>
+                            </td>
+
+                            <!-- Item subtotal -->
+                            <td class="text-end">
+                                $<span th:text="${cartItem.subtotal}">
+                                    0.00
+                                </span>
+                            </td>
+
+                        </tr>
+
+                        <!-- Empty list fallback -->
+                        <tr th:if="${cartItemList == null or #lists.isEmpty(cartItemList)}">
+                            <td colspan="5"
+                                class="text-center">
+                                No purchased items found.
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                    <tfoot>
+                        <tr class="table-light">
+                            <td colspan="4"
+                                class="text-end">
+                                <strong>Order Total:</strong>
+                            </td>
+
+                            <td class="text-end">
+                                <strong>
+                                    $<span th:text="${order.orderTotal}">
+                                        0.00
+                                    </span>
+                                </strong>
+                            </td>
+                        </tr>
+                    </tfoot>
+
+                </table>
+
+            </div>
+
+            <!-- Order summary -->
+            <div class="card mt-4 mb-4">
+
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        Order Summary
                     </h4>
                 </div>
 
-                <h3>List of Items</h3>
-                <div class="row" th:each="cartItem : ${cartItemList}">
-                    <hr />
-                    <div class="col-2"></div>
-                    <div class="col-2">
-                        <a th:href="@{/breadDetail(id=${cartItem.bread.id})}">
-                            <img class="img-fluid shelf-bread"
-                                 th:src="@{'/image/bread/' + ${cartItem.bread.id} + '.png'}"
-                                 style="width: 70px;" />
-                        </a>
-                    </div>
-                    <div class="col-6">
-                        <div class="ms-3">
-                            <a th:href="@{/breadDetail(id=${cartItem.bread.id})}">
-                                <h4 th:text="${cartItem.bread.title}"></h4>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-2">
-                        <h5 class="text-danger fs-5">
-                            $<span th:text="${cartItem.bread.ourPrice}" th:style="${cartItem.bread.inStockNumber} == 0 ? 'text-decoration: line-through' : ''"></span>
-                        </h5>
-                    </div>
+                <div class="card-body">
+
+                    <p>
+                        <strong>Order Number:</strong>
+                        <span th:text="${order.id}"></span>
+                    </p>
+
+                    <p>
+                        <strong>Shipping Method:</strong>
+                        <span th:text="${order.shippingMethod}">
+                        </span>
+                    </p>
+
+                    <p>
+                        <strong>Order Status:</strong>
+                        <span th:text="${order.orderStatus}">
+                        </span>
+                    </p>
+
+                    <p>
+                        <strong>Total Amount:</strong>
+                        $<span th:text="${order.orderTotal}">
+                        </span>
+                    </p>
+
+                    <p class="text-muted mb-0">
+                        Thank you for shopping with Breadbite Bakery!
+                    </p>
+
                 </div>
+
             </div>
+
+            <!-- Continue shopping -->
+            <div class="mb-5">
+
+                <a th:href="@{/}"
+                   class="btn btn-success">
+                    <i class="fa fa-shopping-cart"
+                       aria-hidden="true"></i>
+                    Continue Shopping
+                </a>
+
+            </div>
+
         </div>
     </div>
-    <!-- end of container -->
 
-    <div th:replace="common/header :: body-bottom-scripts" />
+</div>
+
+<!-- Existing footer scripts -->
+<div th:replace="~{common/header :: body-bottom-scripts}"></div>
+
 </body>
 </html>

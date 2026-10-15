@@ -1,3 +1,4 @@
+
 package com.breadbitt.domain;
 
 import java.math.BigDecimal;
@@ -12,7 +13,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 
 @Entity
 public class CartItem {
@@ -20,22 +20,26 @@ public class CartItem {
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
+
 	private int qty;
+
 	private BigDecimal subtotal;
-	
-	@OneToOne
+
+	// Many cart items can reference the same bread product.
+	@ManyToOne
+	@JoinColumn(name = "bread_id")
 	private Bread bread;
-	
+
 	@OneToMany(mappedBy = "cartItem")
 	@JsonIgnore
 	private List<BreadToCartItem> breadToCartItemList;
-	
+
 	@ManyToOne
-	@JoinColumn(name="shopping_cart_id")
+	@JoinColumn(name = "shopping_cart_id")
 	private ShoppingCart shoppingCart;
-	
+
 	@ManyToOne
-	@JoinColumn(name="order_id")
+	@JoinColumn(name = "order_id")
 	private Order order;
 
 	public Long getId() {
@@ -74,7 +78,8 @@ public class CartItem {
 		return breadToCartItemList;
 	}
 
-	public void setBreadToCartItemList(List<BreadToCartItem> breadToCartItemList) {
+	public void setBreadToCartItemList(
+			List<BreadToCartItem> breadToCartItemList) {
 		this.breadToCartItemList = breadToCartItemList;
 	}
 
@@ -93,8 +98,4 @@ public class CartItem {
 	public void setOrder(Order order) {
 		this.order = order;
 	}
-
-	
-	
 }
-

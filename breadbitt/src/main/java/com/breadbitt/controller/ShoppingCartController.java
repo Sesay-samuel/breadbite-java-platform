@@ -41,6 +41,9 @@ public class ShoppingCartController {
 	@Autowired
 	private ShoppingCartService shoppingCartService;
 
+	/*
+	 * GET AUTHENTICATED CUSTOMER
+	 */
 	private User getAuthenticatedUser(Principal principal) {
 
 		if (principal == null) {
@@ -50,6 +53,9 @@ public class ShoppingCartController {
 		return currentCustomerService.resolve(principal);
 	}
 
+	/*
+	 * VERIFY CART ITEM OWNERSHIP
+	 */
 	private boolean ownsCartItem(User user, CartItem cartItem) {
 
 		if (user == null || cartItem == null) {
@@ -66,7 +72,7 @@ public class ShoppingCartController {
 						itemCart.getId());
 	}
 
-	/**
+	/*
 	 * VIEW SHOPPING CART
 	 */
 	@GetMapping("/cart")
@@ -97,14 +103,13 @@ public class ShoppingCartController {
 		return "shoppingCart";
 	}
 
-	/**
+	/*
 	 * ADD BREAD TO CART
 	 */
 	@PostMapping("/addItem")
 	public String addItem(
 			@RequestParam("breadId") Long breadId,
 			@RequestParam("qty") int qty,
-			Model model,
 			Principal principal) {
 
 		User user = getAuthenticatedUser(principal);
@@ -121,27 +126,31 @@ public class ShoppingCartController {
 
 		Bread bread = breadOptional.get();
 
+		// Validate quantity
 		if (qty < 1) {
-			model.addAttribute("invalidQuantity", true);
-			return "forward:/breadDetail?id=" + bread.getId();
+			return "redirect:/breadDetail?id="
+					+ bread.getId()
+					+ "&invalidQuantity=true";
 		}
 
+		// Validate available stock
 		if (qty > bread.getInStockNumber()) {
-			model.addAttribute("notEnoughStock", true);
-			return "forward:/breadDetail?id=" + bread.getId();
+			return "redirect:/breadDetail?id="
+					+ bread.getId()
+					+ "&notEnoughStock=true";
 		}
 
+		// Add product to the customer's shopping cart
 		cartItemService.addBreadToCartItem(
 				bread,
 				user,
 				qty);
 
-		model.addAttribute("addBreadSuccess", true);
-
-		return "forward:/breadDetail?id=" + bread.getId();
+		// Redirect using GET after successful POST
+		return "redirect:/shoppingCart/cart";
 	}
 
-	/**
+	/*
 	 * UPDATE CART QUANTITY
 	 */
 	@PostMapping("/updateCartItem")
@@ -181,7 +190,7 @@ public class ShoppingCartController {
 		return "redirect:/shoppingCart/cart";
 	}
 
-	/**
+	/*
 	 * REMOVE CART ITEM
 	 */
 	@PostMapping("/removeItem")
