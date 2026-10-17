@@ -29,3 +29,31 @@ logs/
 # Operating system files
 .DS_Store
 Thumbs.db
+
+# Terraform downloaded providers and modules
+**/.terraform/
+
+# Terraform state files - may contain secrets
+*.tfstate
+*.tfstate.*
+
+# Terraform variable files - may contain secrets
+*.tfvars
+*.tfvars.json
+
+# Terraform crash logs
+crash.log
+crash.*.log
+
+# Terraform override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Terraform CLI configuration and plan files
+.terraformrc
+terraform.rc
+*.tfplan
+
+# Keep .terraform.lock.hcl in version control
