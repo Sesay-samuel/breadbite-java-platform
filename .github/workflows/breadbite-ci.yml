@@ -212,13 +212,59 @@ jobs:
           cluster_name: breadbite-cluster
           location: europe-west2-a
           project_id: project-ca5e964b-a47d-4a7a-9ec
-      - name: Deploy BreadBite image
+
+      - name: Deploy BreadBite image with rollback protection
+        shell: bash
         env:
           IMAGE: samuelsesay/breadbite-app:${{ github.sha }}
         run: |
+          set -euo pipefail
+
+          echo "Deploying BreadBite image: $IMAGE"
+
+          # Record the currently deployed image before making changes.
+          PREVIOUS_IMAGE=$(kubectl get deployment breadbite-app \
+            --namespace=breadbite \
+            -o jsonpath='{.spec.template.spec.containers[?(@.name=="breadbite-app")].image}')
+
+          if [ -z "$PREVIOUS_IMAGE" ]; then
+            echo "::error::Could not determine the previous image."
+            exit 1
+          fi
+
+          echo "Previous image: $PREVIOUS_IMAGE"
+
+          # Update the deployment.
           kubectl set image deployment/breadbite-app \
             breadbite-app="$IMAGE" \
             --namespace=breadbite
-          kubectl rollout status deployment/breadbite-app \
+
+          # Monitor the rollout.
+          if kubectl rollout status deployment/breadbite-app \
             --namespace=breadbite \
-            --timeout=180s
+            --timeout=180s; then
+
+            echo "BreadBite deployment completed successfully."
+
+          else
+            echo "::error::BreadBite rollout failed. Attempting recovery."
+
+            # Restore the exact image recorded before deployment.
+            if kubectl set image deployment/breadbite-app \
+              breadbite-app="$PREVIOUS_IMAGE" \
+              --namespace=breadbite; then
+
+              if kubectl rollout status deployment/breadbite-app \
+                --namespace=breadbite \
+                --timeout=180s; then
+                echo "Previous image restored successfully."
+              else
+                echo "::error::Recovery rollout also failed."
+              fi
+            else
+              echo "::error::Could not restore the previous image."
+            fi
+
+            # Never report a failed release as successful.
+            exit 1
+          fi
